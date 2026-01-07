@@ -1,1 +1,0 @@
-export { Verify } from './Verify';
