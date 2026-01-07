@@ -18,27 +18,28 @@ interface Plan {
 
 const PLANS: Plan[] = [
   {
-    id: "free",
-    name: "Gratuito",
+    id: "genin",
+    name: "Genin",
     price: 0,
-    description: "Perfeito para começar",
-    features: ["1 bot", "100 mensagens/mês", "Suporte por email", "Dashboard básico"],
+    description: "Plano gratuito para começar a criar bots",
+    features: ["1 bot", "100 mensagens em 7 dias", "Suporte por email", "Dashboard básico"],
   },
   {
-    id: "pro",
-    name: "Profissional",
-    price: 49.9,
-    description: "Para pequenas empresas",
-    features: ["5 bots", "10.000 mensagens/mês", "Suporte prioritário", "Analytics completo", "Automações avançadas"],
+    id: "shunin",
+    name: "Shunin",
+    price: 5,
+    description: "Para quem precisa de mais bots e mensagens",
+    features: ["3 bots", "1.000 mensagens", "Suporte por email", "Dashboard completo"],
   },
   {
-    id: "enterprise",
-    name: "Empresarial",
-    price: 199.9,
-    description: "Para grandes operações",
-    features: ["Bots ilimitados", "Mensagens ilimitadas", "Suporte 24/7", "API completa", "Integrações customizadas"],
+    id: "jounin",
+    name: "Jounin",
+    price: 10,
+    description: "Para usuários avançados",
+    features: ["5 bots", "5.000 mensagens", "Suporte prioritário", "Dashboard completo", "Automação básica"],
   },
-]
+];
+
 
 export function PlanSelector() {
   const router = useRouter()
@@ -91,7 +92,7 @@ export function PlanSelector() {
               </div>
               <div className="mt-4">
                 <div className="text-3xl font-bold">
-                  R$ {plan.price > 0 ? plan.price.toFixed(2) : "0"}
+                  kz {plan.price > 0 ? plan.price.toFixed(2) : "0"}
                   {plan.price > 0 && <span className="text-base text-muted-foreground font-normal">/mês</span>}
                 </div>
               </div>

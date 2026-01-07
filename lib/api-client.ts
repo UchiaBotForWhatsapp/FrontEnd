@@ -1,17 +1,54 @@
-// API client for communicating with backend
-// Ready for integration with your backend endpoints
-
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
+let inMemoryAuthToken: string | null = null
+
+export function setAuthToken(token: string | null) {
+  inMemoryAuthToken = token
+  if (typeof window !== "undefined") {
+    if (token) localStorage.setItem("authToken", token)
+    else localStorage.removeItem("authToken")
+  }
+}
+
+export function getAuthToken(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("authToken") ?? inMemoryAuthToken
+  }
+  return inMemoryAuthToken
+}
+
+export function clearAuthToken() {
+  setAuthToken(null)
+}
 
 export async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`
+  const auth = getAuthToken()
+  const defaultHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+  }
+  if (auth) defaultHeaders["Authorization"] = `Bearer ${auth}`
   const response = await fetch(url, {
     headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
+      ...defaultHeaders,
+      ...((options && (options.headers as Record<string, string>)) || {}),
     },
     ...options,
   })
+
+  // Dev-only debug: log token and Authorization header when running in browser
+  try {
+    if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+      const finalHeaders = {
+        ...defaultHeaders,
+        ...((options && (options.headers as Record<string, string>)) || {}),
+      }
+      // Use console.debug so it's easy to filter in DevTools
+      // eslint-disable-next-line no-console
+      console.debug("apiCall:", endpoint, "token:", getAuthToken(), "headers:", finalHeaders)
+    }
+  } catch (e) {
+    // ignore logging errors
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Unknown error" }))
@@ -21,12 +58,24 @@ export async function apiCall<T>(endpoint: string, options?: RequestInit): Promi
   return response.json()
 }
 
+function extractTokenFromResponse(res: any): string | null {
+  if (!res) return null
+  return (
+    res.token || res.accessToken || res.data?.token || res.data?.accessToken || null
+  )
+}
+
 export const authApi = {
   login: (email: string, password: string) =>
-    apiCall("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    }),
+    (async (email: string, password: string) => {
+      const res: any = await apiCall("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      })
+      const token = extractTokenFromResponse(res)
+      if (token) setAuthToken(token)
+      return res
+    })(email, password),
 
   register: (email: string, password: string, name: string) =>
     apiCall("/auth/register", {
@@ -34,10 +83,21 @@ export const authApi = {
       body: JSON.stringify({ email, password, name }),
     }),
 
-  activateAccount: (token: string) =>
-    apiCall("/auth/activate", {
+  activateAccount: (email:string, code:string) =>
+    (async (email: string, code: string) => {
+      const res: any = await apiCall("/auth/activate", {
+        method: "POST",
+        body: JSON.stringify({ email, code }),
+      })
+      const token = extractTokenFromResponse(res)
+      if (token) setAuthToken(token)
+      return res
+    })(email, code),
+
+  resendActivation: (email: string) =>
+    apiCall("/auth/resend", {
       method: "POST",
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ email }),
     }),
 
   getMe: () => apiCall("/auth/me"),

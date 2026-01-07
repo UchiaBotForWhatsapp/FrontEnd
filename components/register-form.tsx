@@ -42,7 +42,7 @@ export function RegisterForm() {
 
     try {
       await register(formData.email, formData.password, formData.name)
-      router.push("/activate")
+      router.push(`/activate/${formData.email}`)
     } catch (err: any) {
       setFormError(err.message)
     }

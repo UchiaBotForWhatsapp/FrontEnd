@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,26 +11,36 @@ import { authApi } from "@/lib/api-client"
 
 export function ActivationForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const token = searchParams.get("token")
+  const params = useParams()
+  const emailEncoded = params.email as string | undefined
+  const email: string | undefined = emailEncoded ? decodeURIComponent(emailEncoded) : undefined
 
-  const [activationToken, setActivationToken] = useState(token || "")
+  const [activationToken, setActivationToken] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
-    if (!activationToken.trim()) {
-      setError("Por favor, insira o código de ativação")
+    if (!email) {
+      setError("Email não fornecido. Verifique o link de ativação.")
+      return
+    }
+
+    const code = activationToken.trim()
+    if (!/^\d{4}$/.test(code)) {
+      setError("Insira o código de 4 dígitos")
       return
     }
 
     setLoading(true)
     try {
-      await authApi.activateAccount(activationToken)
+      console.log("Activating account for email:", email, "with code:", activationToken)
+      await authApi.activateAccount(email.trim(), activationToken.trim())
       setSuccess(true)
       setTimeout(() => {
         router.push("/plans")
@@ -39,6 +49,24 @@ export function ActivationForm() {
       setError(err.message || "Erro ao ativar conta")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setResendMessage("")
+    if (!email) {
+      setResendMessage("Email não fornecido. Verifique o link de ativação.")
+      return
+    }
+
+    try {
+      setResendLoading(true)
+      await authApi.resendActivation(email)
+      setResendMessage("Email reenviado com sucesso.")
+    } catch (err: any) {
+      setResendMessage(err?.message || "Erro ao reenviar email")
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -60,7 +88,7 @@ export function ActivationForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Ativar Conta</CardTitle>
-        <CardDescription>Confirme seu email para continuar</CardDescription>
+        <CardDescription>{email}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -75,13 +103,15 @@ export function ActivationForm() {
               Código de Ativação
             </label>
             <p className="text-xs text-muted-foreground mb-2">
-              Verifique seu email para o código de ativação que enviamos
+              Verifique o email {email} para o código de ativação enviado
             </p>
             <Input
               id="token"
+              inputMode="numeric"
+              maxLength={4}
               value={activationToken}
-              onChange={(e) => setActivationToken(e.target.value)}
-              placeholder="Digite o código aqui"
+              onChange={(e) => setActivationToken(e.target.value.replace(/[^0-9]/g, ""))}
+              placeholder="0000"
               disabled={loading}
               className="bg-secondary border-border"
             />
@@ -91,11 +121,21 @@ export function ActivationForm() {
             {loading ? "Ativando..." : "Ativar Conta"}
           </Button>
 
-          <div className="text-center text-sm text-muted-foreground">
-            Não recebeu o código?{" "}
-            <button type="button" className="text-accent hover:underline" disabled={loading}>
-              Reenviar email
-            </button>
+          <div className="text-center text-sm text-muted-foreground space-y-2">
+            <div>
+              Não recebeu o código?{" "}
+              <button
+                type="button"
+                className="text-accent hover:underline"
+                disabled={loading || resendLoading}
+                onClick={handleResend}
+              >
+                {resendLoading ? "Reenviando..." : "Reenviar email"}
+              </button>
+            </div>
+            {resendMessage && (
+              <div className="text-xs text-muted-foreground">{resendMessage}</div>
+            )}
           </div>
         </form>
       </CardContent>
