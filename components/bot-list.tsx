@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Spinner } from "@/components/ui/spinner"
 import { useBots } from "@/hooks/use-bots"
 import { Trash2, Edit2, Eye, EyeOff, Plus } from "lucide-react"
 
@@ -47,7 +48,7 @@ export function BotList() {
 
       {isLoading ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Carregando bots...</p>
+          <Spinner className="size-8 mx-auto" />
         </div>
       ) : !bots || bots.length === 0 ? (
         <Card>

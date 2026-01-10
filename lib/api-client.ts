@@ -35,19 +35,15 @@ export async function apiCall<T>(endpoint: string, options?: RequestInit): Promi
     ...options,
   })
 
-  // Dev-only debug: log token and Authorization header when running in browser
   try {
     if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
       const finalHeaders = {
         ...defaultHeaders,
         ...((options && (options.headers as Record<string, string>)) || {}),
       }
-      // Use console.debug so it's easy to filter in DevTools
-      // eslint-disable-next-line no-console
-      console.debug("apiCall:", endpoint, "token:", getAuthToken(), "headers:", finalHeaders)
     }
   } catch (e) {
-    // ignore logging errors
+    console.error(e)
   }
 
   if (!response.ok) {
@@ -101,6 +97,18 @@ export const authApi = {
     }),
 
   getMe: () => apiCall("/auth/me"),
+
+  updateMe: (name: string, email: string) =>
+    apiCall("/auth/me", {
+      method: "PUT",
+      body: JSON.stringify({ name, email }),
+    }),
+
+  updatePlan: (plan: string) =>
+    apiCall("/auth/me/plan", {
+      method: "PUT",
+      body: JSON.stringify({ plan }),
+    }),
 }
 
 export const botApi = {
@@ -134,9 +142,9 @@ export const botApi = {
 
 export const planApi = {
   list: () => apiCall("/plans"),
-  select: (planId: string) =>
+  select: (planName: string, status?: string) =>
     apiCall("/plans/select", {
       method: "POST",
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planName, status }),
     }),
 }

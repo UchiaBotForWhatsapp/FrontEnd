@@ -4,15 +4,76 @@ import { Sidebar } from "@/components/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
+import { Spinner } from "@/components/ui/spinner"
+import { PlanSelector } from "@/components/plan-selector"
+import { useState, useEffect } from "react"
+import { authApi } from "@/lib/api-client"
+
+interface User {
+  id: string
+  name: string
+  email: string
+  active?: boolean
+  plan: {
+    id: string
+    name: string
+    price: number
+  }
+}
 
 export default function SettingsPage() {
-  const [email] = useState("usuario@email.com")
-  const [name, setName] = useState("João Silva")
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
-  const handleSave = () => {
-    // API call ready here
-    console.log("Saving settings:", { name })
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await authApi.getMe()
+        setUser(userData as User)
+      } catch (error) {
+        console.error("Failed to fetch user data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchUser()
+  }, [])
+
+  const handleSaveProfile = async () => {
+    if (!user) return
+    setSaving(true)
+    try {
+      await authApi.updateMe(user.name, user.email)
+      const updatedUser = await authApi.getMe()
+      setUser(updatedUser as User)
+    } catch (error) {
+      console.error("Failed to update profile:", error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <main className="flex-1 overflow-auto flex items-center justify-center">
+          <Spinner className="size-8" />
+        </main>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <main className="flex-1 overflow-auto flex items-center justify-center">
+          <p>Erro ao carregar dados do usuário.</p>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -30,14 +91,22 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Nome</label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-secondary border-border" />
+                <Input
+                  value={user.name}
+                  onChange={(e) => setUser({ ...user, name: e.target.value })}
+                  className="bg-secondary border-border"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
-                <Input value={email} disabled className="bg-secondary border-border bg-opacity-50" />
+                <Input
+                  value={user.email}
+                  onChange={(e) => setUser({ ...user, email: e.target.value })}
+                  className="bg-secondary border-border"
+                />
               </div>
-              <Button onClick={handleSave} className="bg-accent hover:bg-accent/90">
-                Salvar Alterações
+              <Button onClick={handleSaveProfile} disabled={saving} className="bg-accent hover:bg-accent/90">
+                {saving ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </CardContent>
           </Card>
@@ -47,14 +116,8 @@ export default function SettingsPage() {
               <CardTitle>Plano</CardTitle>
               <CardDescription>Gerencie seu plano de assinatura</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-secondary rounded-lg border border-border">
-                <div>
-                  <p className="font-medium">Plano Profissional</p>
-                  <p className="text-sm text-muted-foreground">R$ 49,90 por mês</p>
-                </div>
-                <Button variant="outline">Gerenciar</Button>
-              </div>
+            <CardContent>
+              <PlanSelector />
             </CardContent>
           </Card>
         </div>

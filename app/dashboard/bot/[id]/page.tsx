@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/components/sidebar"
 import { BotForm } from "@/components/bot-form"
+import { Spinner } from "@/components/ui/spinner"
 import { use, useEffect, useState } from "react"
 import { botApi } from "@/lib/api-client"
 
@@ -11,7 +12,7 @@ interface BotPageProps {
 
 export default function EditBotPage({ params }: BotPageProps) {
   const { id } = use(params)
-  const [botData, setBotData] = useState(null)
+  const [botData, setBotData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -35,7 +36,7 @@ export default function EditBotPage({ params }: BotPageProps) {
       <div className="flex h-screen bg-background">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Carregando bot...</p>
+          <Spinner className="size-8" />
         </main>
       </div>
     )

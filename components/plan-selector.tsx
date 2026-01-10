@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { planApi } from "@/lib/api-client"
+import { authApi } from "@/lib/api-client"
 import { Check } from "lucide-react"
 
 interface Plan {
@@ -27,14 +27,14 @@ const PLANS: Plan[] = [
   {
     id: "shunin",
     name: "Shunin",
-    price: 5,
+    price: 5000,
     description: "Para quem precisa de mais bots e mensagens",
     features: ["3 bots", "1.000 mensagens", "Suporte por email", "Dashboard completo"],
   },
   {
     id: "jounin",
     name: "Jounin",
-    price: 10,
+    price: 10000,
     description: "Para usuários avançados",
     features: ["5 bots", "5.000 mensagens", "Suporte prioritário", "Dashboard completo", "Automação básica"],
   },
@@ -43,7 +43,7 @@ const PLANS: Plan[] = [
 
 export function PlanSelector() {
   const router = useRouter()
-  const [selectedPlan, setSelectedPlan] = useState("free")
+  const [selectedPlan, setSelectedPlan] = useState("genin")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -52,8 +52,13 @@ export function PlanSelector() {
     setError("")
 
     try {
-      await planApi.select(selectedPlan)
-      router.push("/dashboard")
+      if (selectedPlan === "genin") {
+        await authApi.updatePlan(selectedPlan)
+        router.push("/welcome")
+      } else {
+        // For paid plans, redirect to payment page
+        router.push(`/payment?plan=${selectedPlan}`)
+      }
     } catch (err: any) {
       setError(err.message || "Erro ao selecionar plano")
       setLoading(false)
@@ -88,7 +93,7 @@ export function PlanSelector() {
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                 </div>
-                {plan.id === "pro" && <Badge className="bg-accent">Popular</Badge>}
+                {plan.id === "shunin" && <Badge className="bg-accent">Popular</Badge>}
               </div>
               <div className="mt-4">
                 <div className="text-3xl font-bold">

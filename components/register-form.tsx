@@ -68,7 +68,7 @@ export function RegisterForm() {
             <Input
               id="name"
               name="name"
-              placeholder="João Silva"
+              placeholder="Manuel Pires Luís"
               value={formData.name}
               onChange={handleChange}
               disabled={loading}

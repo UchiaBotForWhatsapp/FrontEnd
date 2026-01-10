@@ -88,7 +88,6 @@ export function ActivationForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Ativar Conta</CardTitle>
-        <CardDescription>{email}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,7 +102,7 @@ export function ActivationForm() {
               Código de Ativação
             </label>
             <p className="text-xs text-muted-foreground mb-2">
-              Verifique o email {email} para o código de ativação enviado
+              Digite o código de 4 digitos enviado no seguinte email: {email}
             </p>
             <Input
               id="token"
