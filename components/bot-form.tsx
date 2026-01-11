@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-
+import { WhatsappConnectModal } from "./whatsapp-connect-modal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ interface BotFormProps {
 export function BotForm({ botId, initialData }: BotFormProps) {
   const router = useRouter();
   const { createBot, updateBot, toggleBot } = useBots();
+  const [showWhatsappModal, setShowWhatsappModal] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [botActive, setBotActive] = useState(initialData?.active || false);
@@ -77,6 +79,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
       const updated = await toggleBot(botId);
 
       setBotActive(updated.active);
+      setQrCode(updated.qr || null);
 
       alert(`Bot ${updated.active ? "ativado" : "desativado"} com sucesso!`);
     } catch (err: any) {
@@ -88,6 +91,17 @@ export function BotForm({ botId, initialData }: BotFormProps) {
 
   return (
     <div className="space-y-6">
+      <WhatsappConnectModal
+        open={showWhatsappModal}
+        loading={loading}
+        qrCode={qrCode}
+        status={botActive ? "connected" : "waiting"}
+        onClose={() => setShowWhatsappModal(false)}
+        onConfirm={async () => {
+          setShowWhatsappModal(false);
+        }}
+      />
+
       <Link
         href="/dashboard"
         className="flex items-center gap-2 text-accent hover:underline w-fit"
@@ -96,17 +110,21 @@ export function BotForm({ botId, initialData }: BotFormProps) {
         Voltar
       </Link>
 
-      {/* Botão Ativar/Desativar alinhado à direita */}
-      {botId && (
-        <div className="flex justify-end mb-4">
-          <Button
-            onClick={handleToggleBot}
-            className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md"
-          >
-            {botActive ? "Desativar bot" : "Ativar bot"}
-          </Button>
-        </div>
-      )}
+      <div className="flex justify-end">
+        <Button
+          onClick={() => {
+            if (!botActive) {
+              handleToggleBot();
+               setShowWhatsappModal(true);
+            } else {
+              setShowWhatsappModal(false);
+            }
+          }}
+          className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md"
+        >
+          {botActive ? "Desativar bot" : "Ativar bot"}
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
