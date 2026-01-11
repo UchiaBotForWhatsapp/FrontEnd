@@ -110,21 +110,23 @@ export function BotForm({ botId, initialData }: BotFormProps) {
         Voltar
       </Link>
 
-      <div className="flex justify-end">
-        <Button
-          onClick={() => {
-            if (!botActive) {
-              handleToggleBot();
-               setShowWhatsappModal(true);
-            } else {
-              setShowWhatsappModal(false);
-            }
-          }}
-          className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md"
-        >
-          {botActive ? "Desativar bot" : "Ativar bot"}
-        </Button>
-      </div>
+      {botId && (
+        <div className="flex justify-end">
+          <Button
+            onClick={() => {
+              if (!botActive) {
+                handleToggleBot();
+                setShowWhatsappModal(true);
+              } else {
+                setShowWhatsappModal(false);
+              }
+            }}
+            className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md"
+          >
+            {botActive ? "Desativar bot" : "Ativar bot"}
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
