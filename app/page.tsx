@@ -10,7 +10,7 @@ import { useState } from "react"
 export default function Landing() {
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
 
-  const plans = [
+  const PLANS = [
     {
       id: "genin",
       name: "Genin",
@@ -238,7 +238,7 @@ export default function Landing() {
         </div>
 
         <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {plans.map((plan) => (
+          {PLANS.map((plan) => (
             <Card
               key={plan.id}
               className={`relative flex flex-col transition-all duration-300 ${

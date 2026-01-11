@@ -2,46 +2,40 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import { Check } from "lucide-react"
 import { useState, useEffect } from "react"
 import { authApi } from "@/lib/api-client"
+import PLANS from "@/mock/plans.mock"
 
 interface User {
   id: string
   name: string
   email: string
-  plan: {
-    id: string
-    name: string
-    price: number
-  }
+  plan: string
 }
 
-const PLANS = {
-  genin: {
-    name: "Genin",
-    price: 0,
-    description: "Plano gratuito perfeito para começar a criar seus primeiros bots",
-    features: ["1 bot", "100 mensagens em 7 dias", "Suporte por email", "Dashboard básico"],
-  },
-  shunin: {
-    name: "Shunin",
-    price: 5000,
-    description: "Para quem precisa de mais bots e mensagens",
-    features: ["3 bots", "1.000 mensagens", "Suporte por email", "Dashboard completo"],
-  },
-  jounin: {
-    name: "Jounin",
-    price: 10000,
-    description: "Para usuários avançados",
-    features: ["5 bots", "5.000 mensagens", "Suporte prioritário", "Dashboard completo", "Automação básica"],
-  },
+// Normaliza o plano vindo do backend
+const normalizeUserPlan = (plan?: string): keyof typeof PLANS => {
+  if (!plan) return "genin"
+
+  if (plan.startsWith("pending(")) {
+    return plan.replace("pending(", "").replace(")", "") as keyof typeof PLANS
+  }
+
+  return plan as keyof typeof PLANS
 }
 
 export default function WelcomePage() {
   const router = useRouter()
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -56,12 +50,13 @@ export default function WelcomePage() {
         setLoading(false)
       }
     }
+
     fetchUser()
   }, [])
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-background to-card py-12 px-4 flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <Spinner className="size-8" />
       </main>
     )
@@ -69,39 +64,54 @@ export default function WelcomePage() {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-background to-card py-12 px-4 flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <p>Erro ao carregar dados do usuário.</p>
       </main>
     )
   }
 
-  const plan = PLANS[user.plan.id as keyof typeof PLANS] || PLANS.genin
+  const planKey = normalizeUserPlan(user.plan)
+  const plan = PLANS[planKey]
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-card py-12 px-4">
       <div className="max-w-2xl mx-auto">
+        {/* Header */}
         <div className="text-center space-y-4 mb-8">
-          <h1 className="text-4xl font-bold text-accent">Bem-vindo ao UchihaBot!</h1>
+          <h1 className="text-4xl font-bold text-accent">
+            Bem-vindo ao UchihaBot
+          </h1>
           <p className="text-xl text-muted-foreground">
-            Você selecionou o plano <span className="font-semibold text-accent">{plan.name}</span>
+            Você está no plano{" "}
+            <span className="font-semibold text-accent">
+              {plan.name}
+            </span>
           </p>
         </div>
 
+        {/* Card do Plano */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">Seu Plano {plan.name}</CardTitle>
+            <CardTitle className="text-2xl">
+              Seu Plano {plan.name}
+            </CardTitle>
             <CardDescription>
               {plan.description}
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="text-3xl font-bold mb-4">
-              kz {plan.price.toLocaleString()}<span className="text-base text-muted-foreground font-normal">/mês</span>
+              kz {plan.price.toLocaleString()}
+              <span className="text-base text-muted-foreground font-normal">
+                /mês
+              </span>
             </div>
+
             <ul className="space-y-3">
               {plan.features.map((feature, i) => (
                 <li key={i} className="flex gap-2 text-sm">
-                  <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -109,9 +119,10 @@ export default function WelcomePage() {
           </CardContent>
         </Card>
 
+        {/* CTA */}
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">
-            Agora você pode começar a criar seus bots no dashboard.
+            Seu ambiente já está pronto. Hora de executar.
           </p>
           <Button
             onClick={() => router.push("/dashboard")}

@@ -73,11 +73,19 @@ export const authApi = {
       return res
     })(email, password),
 
-  register: (email: string, password: string, name: string) =>
-    apiCall("/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ email, password, name }),
-    }),
+ register: (
+  name: string,
+  email: string,
+  phone: string,
+  country: string,
+  city: string,
+  password: string
+) =>
+  apiCall("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ name, email, phone, country, city, password }),
+  }),
+
 
   activateAccount: (email:string, code:string) =>
     (async (email: string, code: string) => {
@@ -133,10 +141,9 @@ export const botApi = {
       method: "DELETE",
     }),
 
-  toggle: (id: string, active: boolean) =>
+  toggle: (id: string) =>
     apiCall(`/bots/${id}/toggle`, {
-      method: "PATCH",
-      body: JSON.stringify({ active }),
+      method: "PATCH"
     }),
 }
 

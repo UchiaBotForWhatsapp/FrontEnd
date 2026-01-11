@@ -1,128 +1,231 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
 
 export function RegisterForm() {
   const router = useRouter()
   const { register, loading, error } = useAuth()
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" })
+
+  const [countries, setCountries] = useState<string[]>([])
+  const [cities, setCities] = useState<string[]>([])
+  const [allCities, setAllCities] = useState<{ country: string; cities: string[] }[]>([])
   const [formError, setFormError] = useState("")
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    country: "",
+    city: "",
+    password: "",
+    confirmPassword: "",
+  })
+
+  /* =====================
+     Input handler
+  ===================== */
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setFormError("")
+  /* =====================
+     Fetch countries + cities
+  ===================== */
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch("https://countriesnow.space/api/v0.1/countries")
+        const data = await res.json()
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setFormError("Por favor, preencha todos os campos")
+        const countriesList = data.data
+          .map((c: any) => c.country)
+          .sort((a: string, b: string) => a.localeCompare(b))
+
+        setCountries(countriesList)
+        setAllCities(data.data) // guardar cidades por país
+      } catch (err) {
+        console.error("Erro ao carregar países e cidades", err)
+      }
+    }
+
+    fetchCountries()
+  }, [])
+
+  /* =====================
+     Filtrar cidades por país
+  ===================== */
+  useEffect(() => {
+    if (!formData.country) {
+      setCities([])
       return
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setFormError("As senhas não correspondem")
-      return
-    }
+    const selectedCountry = allCities.find((c) => c.country === formData.country)
+    setCities(selectedCountry?.cities || [])
+  }, [formData.country, allCities])
 
-    if (formData.password.length < 8) {
-      setFormError("A senha deve ter pelo menos 8 caracteres")
-      return
-    }
+  /* =====================
+     Submit
+  ===================== */
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setFormError("")
 
-    try {
-      await register(formData.email, formData.password, formData.name)
-      router.push(`/activate/${formData.email}`)
-    } catch (err: any) {
-      setFormError(err.message)
-    }
+  const { name, email, phone, country, city, password, confirmPassword } = formData
+
+  // Validação básica
+  if (!name || !email || !phone || !country || !city || !password || !confirmPassword) {
+    setFormError("Por favor, preencha todos os campos")
+    return
   }
+
+  if (password !== confirmPassword) {
+    setFormError("As senhas não correspondem")
+    return
+  }
+
+  if (password.length < 8) {
+    setFormError("A senha deve ter pelo menos 8 caracteres")
+    return
+  }
+
+  try {
+    // 🔑 Passando todos os campos para a função register
+    await register(name, email, phone, country, city, password)
+
+    // Redireciona para ativação
+    router.push(`/activate/${email}`)
+  } catch (err: any) {
+    setFormError(err.message)
+  }
+}
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Criar Conta</CardTitle>
-        <CardDescription>Comece a gerenciar seus bots WhatsApp</CardDescription>
+        <CardDescription>
+          Comece a gerenciar seus bots WhatsApp
+        </CardDescription>
       </CardHeader>
+
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {(formError || error) && (
-            <div className="p-3 bg-destructive/10 border border-destructive rounded-lg text-sm text-destructive">
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               {formError || error}
             </div>
           )}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-2">
-              Nome Completo
-            </label>
-            <Input
-              id="name"
-              name="name"
-              placeholder="Manuel Pires Luís"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={loading}
-              className="bg-secondary border-border"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              className="bg-secondary border-border"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
-              Senha
-            </label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              className="bg-secondary border-border"
-            />
-          </div>
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-              Confirmar Senha
-            </label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              disabled={loading}
-              className="bg-secondary border-border"
-            />
-          </div>
-          <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={loading}>
+
+          <Input
+            name="name"
+            placeholder="Nome completo"
+            value={formData.name}
+            onChange={handleInputChange}
+            disabled={loading}
+          />
+
+          <Input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleInputChange}
+            disabled={loading}
+          />
+
+          <Input
+            name="phone"
+            placeholder="Telefone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            disabled={loading}
+          />
+
+          {/* País */}
+          <Select
+            value={formData.country}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, country: value, city: "" }))
+            }
+            disabled={loading}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione o país" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Cidade */}
+          <Select
+            value={formData.city}
+            onValueChange={(value) => setFormData((prev) => ({ ...prev, city: value }))}
+            disabled={!formData.country || loading}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione a cidade" />
+            </SelectTrigger>
+            <SelectContent>
+              {cities.map((city) => (
+                <SelectItem key={city} value={city}>
+                  {city}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Input
+            name="password"
+            type="password"
+            placeholder="Senha"
+            value={formData.password}
+            onChange={handleInputChange}
+            disabled={loading}
+          />
+
+          <Input
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirmar senha"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            disabled={loading}
+          />
+
+          <Button
+            type="submit"
+            className="w-full bg-accent hover:bg-accent/90"
+            disabled={loading}
+          >
             {loading ? "Criando conta..." : "Criar Conta"}
           </Button>
+
           <div className="text-center text-sm">
             Já tem conta?{" "}
             <Link href="/login" className="text-accent hover:underline">

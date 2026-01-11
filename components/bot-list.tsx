@@ -7,12 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { useBots } from "@/hooks/use-bots"
-import { Trash2, Edit2, Eye, EyeOff, Plus } from "lucide-react"
+import { Trash2, Edit2, Plus } from "lucide-react"
 
 export function BotList() {
-  const { bots, isLoading, deleteBot, toggleBot } = useBots()
+  const { bots, isLoading, deleteBot} = useBots()
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [toggling, setToggling] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja deletar este bot?")) return
@@ -22,15 +21,6 @@ export function BotList() {
       await deleteBot(id)
     } finally {
       setDeleting(null)
-    }
-  }
-
-  const handleToggle = async (id: string, currentActive: boolean) => {
-    setToggling(id)
-    try {
-      await toggleBot(id, !currentActive)
-    } finally {
-      setToggling(null)
     }
   }
 
@@ -64,7 +54,7 @@ export function BotList() {
       ) : (
         <div className="grid gap-4">
           {bots.map((bot: any) => (
-            <Card key={bot.id} className="bg-card border-border hover:border-accent/50 transition">
+            <Card key={bot._id} className="bg-card border-border hover:border-accent/50 transition">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -85,16 +75,8 @@ export function BotList() {
                     <span className="font-medium text-foreground">{bot.messages_count || 0}</span> mensagens
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleToggle(bot.id, bot.active)}
-                      disabled={toggling === bot.id}
-                      className="gap-2"
-                    >
-                      {bot.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
-                    <Link href={`/dashboard/bot/${bot.id}`}>
+                     
+                    <Link href={`/dashboard/bot/${bot._id}`}>
                       <Button size="sm" variant="ghost" className="gap-2">
                         <Edit2 className="w-4 h-4" />
                       </Button>
@@ -102,7 +84,7 @@ export function BotList() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(bot.id)}
+                      onClick={() => handleDelete(bot._id)}
                       disabled={deleting === bot.id}
                       className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                     >

@@ -1,75 +1,119 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { useBots } from "@/hooks/use-bots"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useBots } from "@/hooks/use-bots";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface BotFormProps {
-  botId?: string
-  initialData?: any
+  botId?: string;
+  initialData?: any;
 }
 
 export function BotForm({ botId, initialData }: BotFormProps) {
-  const router = useRouter()
-  const { createBot, updateBot } = useBots()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const { createBot, updateBot, toggleBot } = useBots();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [botActive, setBotActive] = useState(initialData?.active || false);
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
     type: initialData?.type || "personal",
-    greeting_message: initialData?.greeting_message || "Olá! Como posso ajudar?",
-    webhook_url: initialData?.webhook_url || "",
-  })
+    greeting: initialData?.greeting || "Olá! Como posso ajudar?",
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     if (!formData.name.trim()) {
-      setError("Nome do bot é obrigatório")
-      return
+      setError("Nome do bot é obrigatório");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       if (botId) {
-        await updateBot(botId, formData)
+        await updateBot(botId, formData);
       } else {
-        await createBot(formData)
+        await createBot(formData);
       }
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Erro ao salvar bot")
+      setError(err.message || "Erro ao salvar bot");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const handleToggleBot = async () => {
+    if (!botId) return;
+
+    setLoading(true);
+    try {
+      const updated = await toggleBot(botId);
+
+      setBotActive(updated.active);
+
+      alert(`Bot ${updated.active ? "ativado" : "desativado"} com sucesso!`);
+    } catch (err: any) {
+      alert("Erro ao atualizar bot: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <Link href="/dashboard" className="flex items-center gap-2 text-accent hover:underline w-fit">
+      <Link
+        href="/dashboard"
+        className="flex items-center gap-2 text-accent hover:underline w-fit"
+      >
         <ArrowLeft className="w-4 h-4" />
         Voltar
       </Link>
 
+      {/* Botão Ativar/Desativar alinhado à direita */}
+      {botId && (
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={handleToggleBot}
+            className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md"
+          >
+            {botActive ? "Desativar bot" : "Ativar bot"}
+          </Button>
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{botId ? "Editar Bot" : "Criar Novo Bot"}</CardTitle>
-          <CardDescription>Configure os detalhes básicos do seu bot WhatsApp</CardDescription>
+          <CardDescription>
+            Configure os detalhes básicos do seu bot WhatsApp
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -137,7 +181,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
                 id="greeting_message"
                 name="greeting_message"
                 placeholder="Mensagem de saudação do bot"
-                value={formData.greeting_message}
+                value={formData.greeting}
                 onChange={handleChange}
                 disabled={loading}
                 rows={3}
@@ -145,25 +189,12 @@ export function BotForm({ botId, initialData }: BotFormProps) {
               />
             </div>
 
-            <div>
-              <Label htmlFor="webhook_url" className="mb-2 block">
-                URL do Webhook (Opcional)
-              </Label>
-              <Input
-                id="webhook_url"
-                name="webhook_url"
-                placeholder="https://seu-dominio.com/webhook"
-                type="url"
-                value={formData.webhook_url}
-                onChange={handleChange}
-                disabled={loading}
-                className="bg-secondary border-border"
-              />
-              <p className="text-xs text-muted-foreground mt-2">Onde seu servidor receberá eventos do bot</p>
-            </div>
-
             <div className="flex gap-4">
-              <Button type="submit" className="bg-accent hover:bg-accent/90" disabled={loading}>
+              <Button
+                type="submit"
+                className="bg-accent hover:bg-accent/90"
+                disabled={loading}
+              >
                 {loading ? "Salvando..." : "Salvar Bot"}
               </Button>
               <Link href="/dashboard">
@@ -176,5 +207,5 @@ export function BotForm({ botId, initialData }: BotFormProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

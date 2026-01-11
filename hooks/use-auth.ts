@@ -24,11 +24,21 @@ export function useAuth() {
     }
   }, [])
 
-  const register = useCallback(async (email: string, password: string, name: string) => {
+const register = useCallback(
+  async (
+    name: string,
+    email: string,
+    phone: string,
+    country: string,
+    city: string,
+    password: string
+  ) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await authApi.register(email, password, name)
+      // 🔑 Passando todos os campos para o client
+      const response = await authApi.register(name, email, phone, country, city, password)
+
       setUser(response.user)
       localStorage.setItem("auth_token", response.token)
       return response
@@ -38,7 +48,10 @@ export function useAuth() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  },
+  []
+)
+
 
   const logout = useCallback(() => {
     setUser(null)

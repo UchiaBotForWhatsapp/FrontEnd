@@ -29,11 +29,17 @@ export function useBots() {
     mutate((prev: any) => prev?.filter((bot: any) => bot.id !== id), false)
   }
 
-  const toggleBot = async (id: string, active: boolean) => {
-    const updated = await botApi.toggle(id, active)
-    mutate((prev: any) => prev?.map((bot: any) => (bot.id === id ? updated : bot)), false)
-    return updated
-  }
+  const toggleBot = async (id: string) => {
+  const updated = await botApi.toggle(id)
+  mutate((prev: any) =>
+    prev?.map((bot: any) =>
+      bot._id === id ? updated : bot 
+    ),
+    false
+  )
+  return updated
+}
+
 
   return {
     bots,
