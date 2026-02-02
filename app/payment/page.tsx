@@ -78,7 +78,7 @@ export default function PaymentPage() {
                   <div className="p-4 bg-muted rounded-lg">
                     <h4 className="font-semibold mb-2">Multicaixa Express</h4>
                     <p className="text-sm">Número: 929004469</p>
-                    <p className="text-sm">Titular: UchihaBot Ltd</p>
+                    <p className="text-sm">Titular: UBot Ltd</p>
                   </div>
                 </div>
               </div>

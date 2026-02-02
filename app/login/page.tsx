@@ -8,7 +8,7 @@ export default function LoginPage() {
           <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
             <span className="text-accent-foreground font-bold">UB</span>
           </div>
-          <h1 className="text-2xl font-bold">Uchiha Bot</h1>
+          <h1 className="text-2xl font-bold">U Bot</h1>
         </div>
         <LoginForm />
       </div>

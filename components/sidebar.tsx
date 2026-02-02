@@ -57,7 +57,7 @@ export function Sidebar() {
             <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
               <span className="text-sidebar-primary-foreground font-bold text-sm">UB</span>
             </div>
-            <h1 className="font-bold text-lg">Uchiha Bot</h1>
+            <h1 className="font-bold text-lg">U Bot</h1>
           </Link>
 
           {/* Botão fechar só aparece em mobile */}

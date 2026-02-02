@@ -79,7 +79,7 @@ export default function WelcomePage() {
         {/* Header */}
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-4xl font-bold text-accent">
-            Bem-vindo ao UchihaBot
+            Bem-vindo ao UBot
           </h1>
           <p className="text-xl text-muted-foreground">
             Você está no plano{" "}

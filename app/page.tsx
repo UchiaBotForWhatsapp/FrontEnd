@@ -61,7 +61,7 @@ export default function Landing() {
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
               <span className="text-accent-foreground font-bold text-sm">UB</span>
             </div>
-            <span className="font-bold text-lg">Uchiha Bot</span>
+            <span className="font-bold text-lg">UBot</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm hover:text-accent transition">
@@ -176,7 +176,7 @@ export default function Landing() {
                 UB
               </div>
               <div>
-                <h4 className="font-semibold text-sm">Uchiha Bot Support</h4>
+                <h4 className="font-semibold text-sm">U Bot Support</h4>
                 <p className="text-xs text-muted-foreground">online</p>
               </div>
             </div>
@@ -291,7 +291,7 @@ export default function Landing() {
         <div className="bg-card border border-accent/30 rounded-lg p-8 md:p-12 text-center">
           <h2 className="text-3xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Junte-se a milhares de empresas que já estão automatizando seu atendimento com Uchiha Bot
+            Junte-se a milhares de empresas que já estão automatizando seu atendimento com U Bot
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
@@ -316,7 +316,7 @@ export default function Landing() {
                 <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center">
                   <span className="text-accent-foreground font-bold text-xs">UB</span>
                 </div>
-                <span className="font-bold">Uchiha Bot</span>
+                <span className="font-bold">U Bot</span>
               </div>
               <p className="text-sm text-muted-foreground">Plataforma inteligente de automação WhatsApp</p>
             </div>
@@ -377,7 +377,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2026 Uchiha Bot. Todos os direitos reservados.</p>
+            <p>© 2026 U Bot. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>

@@ -42,7 +42,7 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Login</CardTitle>
-        <CardDescription>Acesse sua conta Uchiha Bot</CardDescription>
+        <CardDescription>Acesse sua conta U Bot</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
