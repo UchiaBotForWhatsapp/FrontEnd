@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ const PLANS = {
   jounin: { name: "Jounin", price: 10000 }
 }
 
-export default function PaymentPage() {
+function PaymentContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const planName = searchParams.get("plan") || "shunin"
@@ -117,5 +117,17 @@ export default function PaymentPage() {
         </Card>
       </div>
     </main>
+  )
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-gradient-to-b from-background to-card py-12 px-4" />
+      }
+    >
+      <PaymentContent />
+    </Suspense>
   )
 }
