@@ -1,3 +1,3 @@
-export function login(){
+export function Login(){
     return "Login successful ou ou!";
 }
