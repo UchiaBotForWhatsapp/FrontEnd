@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -20,6 +20,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
+import { LoadingButton } from "./loading-button"
+import { LogIn } from "lucide-react"
 
 export function RegisterForm() {
   const router = useRouter()
@@ -87,38 +89,38 @@ export function RegisterForm() {
   /* =====================
      Submit
   ===================== */
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setFormError("")
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormError("")
 
-  const { name, email, phone, country, city, password, confirmPassword } = formData
+    const { name, email, phone, country, city, password, confirmPassword } = formData
 
-  // Validação básica
-  if (!name || !email || !phone || !country || !city || !password || !confirmPassword) {
-    setFormError("Por favor, preencha todos os campos")
-    return
+    // Validação básica
+    if (!name || !email || !phone || !country || !city || !password || !confirmPassword) {
+      setFormError("Por favor, preencha todos os campos")
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setFormError("As senhas não correspondem")
+      return
+    }
+
+    if (password.length < 8) {
+      setFormError("A senha deve ter pelo menos 8 caracteres")
+      return
+    }
+
+    try {
+      // 🔑 Passando todos os campos para a função register
+      await register(name, email, phone, country, city, password)
+
+      // Redireciona para ativação
+      router.push(`/activate/${email}`)
+    } catch (err: any) {
+      setFormError(err.message)
+    }
   }
-
-  if (password !== confirmPassword) {
-    setFormError("As senhas não correspondem")
-    return
-  }
-
-  if (password.length < 8) {
-    setFormError("A senha deve ter pelo menos 8 caracteres")
-    return
-  }
-
-  try {
-    // 🔑 Passando todos os campos para a função register
-    await register(name, email, phone, country, city, password)
-
-    // Redireciona para ativação
-    router.push(`/activate/${email}`)
-  } catch (err: any) {
-    setFormError(err.message)
-  }
-}
 
   return (
     <Card className="w-full max-w-md">
@@ -218,13 +220,15 @@ export function RegisterForm() {
             disabled={loading}
           />
 
-          <Button
+          <LoadingButton
+            loading={loading}
             type="submit"
-            className="w-full bg-accent hover:bg-accent/90"
-            disabled={loading}
+            className="w-full bg-accent hover:bg-accent/90 cursor-pointer"
+
           >
+            <LogIn />
             {loading ? "Criando conta..." : "Criar Conta"}
-          </Button>
+          </LoadingButton>
 
           <div className="text-center text-sm">
             Já tem conta?{" "}

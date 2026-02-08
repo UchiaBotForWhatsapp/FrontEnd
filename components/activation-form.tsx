@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { authApi } from "@/lib/api-client"
+import { LoadingButton } from "./loading-button";
 
 export function ActivationForm() {
   const router = useRouter()
@@ -116,21 +117,23 @@ export function ActivationForm() {
             />
           </div>
 
-          <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={loading}>
+          <LoadingButton
+            loading={loading} type="submit" className="w-full bg-accent hover:bg-accent/90 cursor-pointer" >
             {loading ? "Ativando..." : "Ativar Conta"}
-          </Button>
+          </LoadingButton>
 
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <div>
               Não recebeu o código?{" "}
-              <button
+              <LoadingButton
+                loading={loading}
                 type="button"
                 className="text-accent hover:underline"
                 disabled={loading || resendLoading}
                 onClick={handleResend}
               >
                 {resendLoading ? "Reenviando..." : "Reenviar email"}
-              </button>
+              </LoadingButton>
             </div>
             {resendMessage && (
               <div className="text-xs text-muted-foreground">{resendMessage}</div>

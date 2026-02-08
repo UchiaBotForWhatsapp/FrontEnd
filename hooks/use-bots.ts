@@ -30,15 +30,15 @@ export function useBots() {
   }
 
   const toggleBot = async (id: string) => {
-  const updated = await botApi.toggle(id)
-  mutate((prev: any) =>
-    prev?.map((bot: any) =>
-      bot._id === id ? updated : bot 
-    ),
-    false
-  )
-  return updated
-}
+    const updated = await botApi.toggle(id)
+    mutate((prev: any) =>
+      prev?.map((bot: any) =>
+        bot._id === id ? updated : bot
+      ),
+      false
+    )
+    return updated
+  }
 
 
   return {

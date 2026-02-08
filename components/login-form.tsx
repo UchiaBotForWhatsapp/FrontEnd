@@ -5,10 +5,12 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
+import { LoadingButton } from "./loading-button"
+import { LogIn } from "lucide-react"
 
 export function LoginForm() {
   const router = useRouter()
@@ -42,7 +44,7 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Login</CardTitle>
-        <CardDescription>Acesse sua conta U Bot</CardDescription>
+        <CardDescription>Acesse sua conta Uchiha Bot</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,9 +83,10 @@ export function LoginForm() {
               className="bg-secondary border-border"
             />
           </div>
-          <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={loading}>
+          <LoadingButton type="submit" loading={loading} className="w-full bg-accent hover:bg-accent/90 cursor-pointer">
+            <LogIn />
             {loading ? "Entrando..." : "Entrar"}
-          </Button>
+          </LoadingButton>
           <div className="text-center text-sm">
             Não tem conta?{" "}
             <Link href="/register" className="text-accent hover:underline">
