@@ -8,19 +8,32 @@ import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { useBots } from "@/hooks/use-bots"
 import { Trash2, Edit2, Plus } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
+import { Modal } from "./modal"
 
 export function BotList() {
   const { bots, isLoading, deleteBot } = useBots()
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [botToDelete, setBotToDelete] = useState<string | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja deletar este bot?")) return
+  const OpenDeleteBot = (BotId: string) => {
+    setBotToDelete(BotId)
+    setIsDialogOpen(true)
+  }
 
-    setDeleting(id)
+  const handleConfirmDelete = async () => {
+    if (!botToDelete) return
+
+    setDeleting(true)
     try {
-      await deleteBot(id)
+      await deleteBot(botToDelete)
+      setIsDialogOpen(false)
+      setBotToDelete(null)
+    } catch (error) {
+      console.error("Erro ao deletar bot", error)
     } finally {
-      setDeleting(null)
+      setDeleting(false)
     }
   }
 
@@ -81,22 +94,40 @@ export function BotList() {
                         <Edit2 className="w-4 h-4 " />
                       </Button>
                     </Link>
+
+
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(bot._id)}
-                      disabled={deleting === bot._id}
+                      onClick={() => OpenDeleteBot(bot._id)}
+
                       className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4 cursor-pointer" />
                     </Button>
+
+
+
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
+
         </div>
       )}
-    </div>
+
+      <Modal
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title="Confirmar exclusão do bot?"
+        description="Essa ação é irreversível."
+        confirmText="Confirmar Exclusão"
+        onConfirm={async () => {
+          { handleConfirmDelete }
+        }}
+      />
+
+    </div >
   )
 }
