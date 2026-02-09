@@ -49,7 +49,7 @@ export function PlanSelectorSelected() {
     const fetchUser = async () => {
       try {
         const userData = await authApi.getMe()
-        const normalizedPlan = normalizeUserPlan(userData.plan)
+        const normalizedPlan = normalizeUserPlan((userData as User).plan)
 
         setUser(userData as User)
         setSelectedPlan(normalizedPlan)
@@ -98,9 +98,8 @@ export function PlanSelectorSelected() {
 
       {/* Plano atual */}
       <p
-        className={`text-center text-sm font-medium ${
-          isPending ? "text-yellow-500" : "text-foreground"
-        }`}
+        className={`text-center text-sm font-medium ${isPending ? "text-yellow-500" : "text-foreground"
+          }`}
       >
         Plano atual:{" "}
         <span className="font-semibold">
@@ -124,11 +123,10 @@ export function PlanSelectorSelected() {
             <Card
               key={plan.id}
               onClick={() => setSelectedPlan(plan.id)}
-              className={`flex flex-col cursor-pointer transition border-2 ${
-                isSelected
-                  ? "border-accent bg-accent/10 shadow-md"
-                  : "border-border hover:border-accent/50"
-              }`}
+              className={`flex flex-col cursor-pointer transition border-2 ${isSelected
+                ? "border-accent bg-accent/10 shadow-md"
+                : "border-border hover:border-accent/50"
+                }`}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">

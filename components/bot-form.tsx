@@ -17,10 +17,12 @@ import { Label } from "@/components/ui/label";
 import { useBots } from "@/hooks/use-bots";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { LoadingButton } from "./loading-button";
 
 interface BotFormProps {
   botId?: string;
   initialData?: any;
+
 }
 
 export function BotForm({ botId, initialData }: BotFormProps) {
@@ -112,7 +114,9 @@ export function BotForm({ botId, initialData }: BotFormProps) {
 
       {botId && (
         <div className="flex justify-end">
-          <Button
+          <LoadingButton
+            type="button"
+
             onClick={() => {
               if (!botActive) {
                 handleToggleBot();
@@ -121,10 +125,11 @@ export function BotForm({ botId, initialData }: BotFormProps) {
                 setShowWhatsappModal(false);
               }
             }}
-            className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md"
+            loading={loading}
+            className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md cursor-pointer"
           >
             {botActive ? "Desativar bot" : "Ativar bot"}
-          </Button>
+          </LoadingButton>
         </div>
       )}
 
@@ -210,15 +215,16 @@ export function BotForm({ botId, initialData }: BotFormProps) {
             </div>
 
             <div className="flex gap-4">
-              <Button
+              <LoadingButton
+                loading={loading}
                 type="submit"
-                className="bg-accent hover:bg-accent/90"
-                disabled={loading}
+                className="bg-accent hover:bg-accent/90 cursor-pointer"
+
               >
                 {loading ? "Salvando..." : "Salvar Bot"}
-              </Button>
+              </LoadingButton>
               <Link href="/dashboard">
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" className="cursor-pointer">
                   Cancelar
                 </Button>
               </Link>
