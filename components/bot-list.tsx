@@ -1,41 +1,49 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Spinner } from "@/components/ui/spinner"
-import { useBots } from "@/hooks/use-bots"
-import { Trash2, Edit2, Plus } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { Modal } from "./modal"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { useBots } from "@/hooks/use-bots";
+import { Trash2, Edit2, Plus } from "lucide-react";
+import { Modal } from "./modal";
+import { toast } from "sonner";
 
 export function BotList() {
-  const { bots, isLoading, deleteBot } = useBots()
-  const [botToDelete, setBotToDelete] = useState<string | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const { bots, isLoading, deleteBot } = useBots();
+  const [botToDelete, setBotToDelete] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const OpenDeleteBot = (BotId: string) => {
-    setBotToDelete(BotId)
-    setIsDialogOpen(true)
-  }
+    setBotToDelete(BotId);
+    setIsDialogOpen(true);
+  };
 
   const handleConfirmDelete = async () => {
-    if (!botToDelete) return
+    if (!botToDelete) return;
 
-    setDeleting(true)
+    setDeleting(true);
     try {
-      await deleteBot(botToDelete)
-      setIsDialogOpen(false)
-      setBotToDelete(null)
+      await deleteBot(botToDelete);
+      toast.success("Bot excluído com sucesso!");
+      setIsDialogOpen(false);
+      setBotToDelete(null);
     } catch (error) {
-      console.error("Erro ao deletar bot", error)
+      console.error("Erro ao deletar bot", error);
+      toast.error("Ocorreu um erro ao excluir o bot.");
     } finally {
-      setDeleting(false)
+      setDeleting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -57,9 +65,13 @@ export function BotList() {
         <Card>
           <CardContent className="pt-12 ">
             <div className="text-center space-y-4">
-              <p className="text-muted-foreground">Você ainda não tem nenhum bot criado</p>
+              <p className="text-muted-foreground">
+                Você ainda não tem nenhum bot criado
+              </p>
               <Link href="/dashboard/bot/new">
-                <Button className="bg-accent hover:bg-accent/90">Criar Primeiro Bot</Button>
+                <Button className="bg-accent hover:bg-accent/90">
+                  Criar Primeiro Bot
+                </Button>
               </Link>
             </div>
           </CardContent>
@@ -67,53 +79,61 @@ export function BotList() {
       ) : (
         <div className="grid gap-4">
           {bots.map((bot: any) => (
-            <Card key={bot._id} className="bg-card border-border hover:border-accent/50 transition">
+            <Card
+              key={bot._id}
+              className="bg-card border-border hover:border-accent/50 transition"
+            >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <CardTitle className="text-xl">{bot.name}</CardTitle>
-                      <Badge variant={bot.active ? "default" : "secondary"} className="bg-accent">
+                      <Badge
+                        variant={bot.active ? "default" : "secondary"}
+                        className="bg-accent"
+                      >
                         {bot.active ? "Ativo" : "Inativo"}
                       </Badge>
                       {bot.plan && <Badge variant="outline">{bot.plan}</Badge>}
                     </div>
-                    <CardDescription className="line-clamp-2 ">{bot.description || "Sem descrição"}</CardDescription>
+                    <CardDescription className="line-clamp-2 ">
+                      {bot.description || "Sem descrição"}
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between ">
                   <div className="text-sm text-muted-foreground cursor-pointer">
-                    <span className="font-medium text-foreground">{bot.messages_count || 0}</span> mensagens
+                    <span className="font-medium text-foreground">
+                      {bot.messages_count || 0}
+                    </span>{" "}
+                    mensagens
                   </div>
                   <div className="flex gap-2">
-
                     <Link href={`/dashboard/bot/${bot._id}`}>
-                      <Button size="sm" variant="ghost" className="gap-2 cursor-pointer">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-2 cursor-pointer"
+                      >
                         <Edit2 className="w-4 h-4 " />
                       </Button>
                     </Link>
-
 
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => OpenDeleteBot(bot._id)}
-
                       className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4 cursor-pointer" />
                     </Button>
-
-
-
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-
         </div>
       )}
 
@@ -124,10 +144,9 @@ export function BotList() {
         description="Essa ação é irreversível."
         confirmText="Confirmar Exclusão"
         onConfirm={async () => {
-          { handleConfirmDelete }
+          await handleConfirmDelete();
         }}
       />
-
-    </div >
-  )
+    </div>
+  );
 }
