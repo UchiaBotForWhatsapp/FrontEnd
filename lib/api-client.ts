@@ -1,64 +1,77 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
-let inMemoryAuthToken: string | null = null
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+let inMemoryAuthToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
-  inMemoryAuthToken = token
+  inMemoryAuthToken = token;
   if (typeof window !== "undefined") {
-    if (token) localStorage.setItem("authToken", token)
-    else localStorage.removeItem("authToken")
+    if (token) localStorage.setItem("authToken", token);
+    else localStorage.removeItem("authToken");
   }
 }
 
 export function getAuthToken(): string | null {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("authToken") ?? inMemoryAuthToken
+    return localStorage.getItem("authToken") ?? inMemoryAuthToken;
   }
-  return inMemoryAuthToken
+  return inMemoryAuthToken;
 }
 
 export function clearAuthToken() {
-  setAuthToken(null)
+  setAuthToken(null);
 }
 
-export async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`
-  const auth = getAuthToken()
+export async function apiCall<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const auth = getAuthToken();
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
-  }
-  if (auth) defaultHeaders["Authorization"] = `Bearer ${auth}`
+  };
+  if (auth) defaultHeaders["Authorization"] = `Bearer ${auth}`;
   const response = await fetch(url, {
     headers: {
       ...defaultHeaders,
       ...((options && (options.headers as Record<string, string>)) || {}),
     },
     ...options,
-  })
+  });
 
   try {
-    if (typeof window !== "undefined" && process.env.NODE_ENV !== "production") {
+    if (
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV !== "production"
+    ) {
       const finalHeaders = {
         ...defaultHeaders,
         ...((options && (options.headers as Record<string, string>)) || {}),
-      }
+      };
     }
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "Unknown error" }))
-    throw new Error(error.message || `API error: ${response.status}`)
+    const error = await response
+      .json()
+      .catch(() => ({ message: "Unknown error" }));
+    throw new Error(error.message || `API error: ${response.status}`);
   }
 
-  return response.json()
+  return response.json();
 }
 
 function extractTokenFromResponse(res: any): string | null {
-  if (!res) return null
+  if (!res) return null;
   return (
-    res.token || res.accessToken || res.data?.token || res.data?.accessToken || null
-  )
+    res.token ||
+    res.accessToken ||
+    res.data?.token ||
+    res.data?.accessToken ||
+    null
+  );
 }
 
 export const authApi = {
@@ -67,35 +80,45 @@ export const authApi = {
       const res: any = await apiCall("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
-      })
-      const token = extractTokenFromResponse(res)
-      if (token) setAuthToken(token)
-      return res
+      });
+      const token = extractTokenFromResponse(res);
+      if (token) setAuthToken(token);
+      return res;
     })(email, password),
 
- register: (
-  name: string,
-  email: string,
-  phone: string,
-  country: string,
-  city: string,
-  password: string
-) =>
-  apiCall("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({ name, email, phone, country, city, password }),
-  }),
+  register: (
+    name: string,
+    email: string,
+    phone: string,
+    country: string,
+    city: string,
+    gender: string,
+    termsAccepted: boolean,
+    password: string,
+  ) =>
+    apiCall("/auth/sign-up", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        email,
+        phone,
+        country,
+        city,
+        gender,
+        termsAccepted,
+        password,
+      }),
+    }),
 
-
-  activateAccount: (email:string, code:string) =>
+  activateAccount: (email: string, code: string) =>
     (async (email: string, code: string) => {
       const res: any = await apiCall("/auth/activate", {
         method: "POST",
         body: JSON.stringify({ email, code }),
-      })
-      const token = extractTokenFromResponse(res)
-      if (token) setAuthToken(token)
-      return res
+      });
+      const token = extractTokenFromResponse(res);
+      if (token) setAuthToken(token);
+      return res;
     })(email, code),
 
   resendActivation: (email: string) =>
@@ -117,7 +140,7 @@ export const authApi = {
       method: "PUT",
       body: JSON.stringify({ plan }),
     }),
-}
+};
 
 export const botApi = {
   list: () => apiCall("/bots"),
@@ -143,9 +166,9 @@ export const botApi = {
 
   toggle: (id: string) =>
     apiCall(`/bots/${id}/toggle`, {
-      method: "PATCH"
+      method: "PATCH",
     }),
-}
+};
 
 export const planApi = {
   list: () => apiCall("/plans"),
@@ -154,4 +177,4 @@ export const planApi = {
       method: "POST",
       body: JSON.stringify({ planName, status }),
     }),
-}
+};
