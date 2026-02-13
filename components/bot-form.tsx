@@ -4,6 +4,7 @@ import type React from "react";
 import { WhatsappConnectModal } from "./whatsapp-connect-modal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +23,6 @@ import { LoadingButton } from "./loading-button";
 interface BotFormProps {
   botId?: string;
   initialData?: any;
-
 }
 
 export function BotForm({ botId, initialData }: BotFormProps) {
@@ -43,7 +43,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -65,9 +65,13 @@ export function BotForm({ botId, initialData }: BotFormProps) {
       } else {
         await createBot(formData);
       }
+      toast.success(
+        `Bot ${formData.name} ${botId ? "atualizado" : "criado"} com sucesso!`,
+      );
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Erro ao salvar bot");
+      toast.error(err.message || "Erro ao salvar bot");
     } finally {
       setLoading(false);
     }
@@ -78,14 +82,16 @@ export function BotForm({ botId, initialData }: BotFormProps) {
 
     setLoading(true);
     try {
-      const updated = await toggleBot(botId);
+      const updated: any = await toggleBot(botId);
 
       setBotActive(updated.active);
       setQrCode(updated.qr || null);
 
-      alert(`Bot ${updated.active ? "ativado" : "desativado"} com sucesso!`);
+      toast.success(
+        `Bot ${updated.name} ${updated.active ? "ativado" : "desativado"} com sucesso!`,
+      );
     } catch (err: any) {
-      alert("Erro ao atualizar bot: " + err.message);
+      toast.error("Erro ao atualizar bot");
     } finally {
       setLoading(false);
     }
@@ -116,7 +122,6 @@ export function BotForm({ botId, initialData }: BotFormProps) {
         <div className="flex justify-end">
           <LoadingButton
             type="button"
-
             onClick={() => {
               if (!botActive) {
                 handleToggleBot();
@@ -219,12 +224,15 @@ export function BotForm({ botId, initialData }: BotFormProps) {
                 loading={loading}
                 type="submit"
                 className="bg-accent hover:bg-accent/90 cursor-pointer"
-
               >
                 {loading ? "Salvando..." : "Salvar Bot"}
               </LoadingButton>
               <Link href="/dashboard">
-                <Button type="button" variant="outline" className="cursor-pointer">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="cursor-pointer"
+                >
                   Cancelar
                 </Button>
               </Link>

@@ -20,13 +20,13 @@ export function useBots() {
 
   const updateBot = async (id: string, data: any) => {
     const updated = await botApi.update(id, data)
-    mutate((prev: any) => prev?.map((bot: any) => (bot.id === id ? updated : bot)), false)
+    mutate((prev: any) => prev?.map((bot: any) => (bot._id === id ? updated : bot)), false)
     return updated
   }
 
   const deleteBot = async (id: string) => {
     await botApi.delete(id)
-    mutate((prev: any) => prev?.filter((bot: any) => bot.id !== id), false)
+    mutate((prev: any) => prev?.filter((bot: any) => bot._id !== id), false)
   }
 
   const toggleBot = async (id: string) => {
