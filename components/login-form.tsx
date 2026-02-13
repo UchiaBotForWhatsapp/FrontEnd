@@ -10,18 +10,25 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
 import { LoadingButton } from "./loading-button"
-import { LogIn } from "lucide-react"
+import { Eye, EyeOff, LogIn } from "lucide-react"
 
 export function LoginForm() {
   const router = useRouter()
   const { login, loading, error } = useAuth()
   const [formData, setFormData] = useState({ email: "", password: "" })
   const [formError, setFormError] = useState("")
+  const [showPassword, setShowPasword] = useState(false)
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
+
+  function togglePassword() {
+    setShowPasword(prev => !prev);
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,16 +79,28 @@ export function LoginForm() {
             <label htmlFor="password" className="block text-sm font-medium mb-2">
               Senha
             </label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              className="bg-secondary border-border"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                disabled={loading}
+                className="bg-secondary border-border pr-10"
+              />
+              <button
+                type="button"
+                onClick={togglePassword}
+                aria-label={showPassword ? "ocultar senha" : "Mostrar senha "}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500  cursor-pointer  "
+
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5 " />}
+
+              </button>
+            </div>
           </div>
           <LoadingButton type="submit" loading={loading} className="w-full bg-accent hover:bg-accent/90 cursor-pointer">
             <LogIn />
