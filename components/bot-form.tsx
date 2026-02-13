@@ -65,7 +65,9 @@ export function BotForm({ botId, initialData }: BotFormProps) {
       } else {
         await createBot(formData);
       }
-      toast.success(`Bot ${botId ? "atualizado" : "criado"} com sucesso!`);
+      toast.success(
+        `Bot ${formData.name} ${botId ? "atualizado" : "criado"} com sucesso!`,
+      );
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Erro ao salvar bot");
@@ -80,16 +82,16 @@ export function BotForm({ botId, initialData }: BotFormProps) {
 
     setLoading(true);
     try {
-      const updated = await toggleBot(botId);
+      const updated: any = await toggleBot(botId);
 
       setBotActive(updated.active);
       setQrCode(updated.qr || null);
 
       toast.success(
-        `Bot ${updated.active ? "ativado" : "desativado"} com sucesso!`,
+        `Bot ${updated.name} ${updated.active ? "ativado" : "desativado"} com sucesso!`,
       );
     } catch (err: any) {
-      toast.error("Erro ao atualizar bot: " + err.message);
+      toast.error("Erro ao atualizar bot");
     } finally {
       setLoading(false);
     }

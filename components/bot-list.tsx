@@ -19,12 +19,12 @@ import { toast } from "sonner";
 
 export function BotList() {
   const { bots, isLoading, deleteBot } = useBots();
-  const [botToDelete, setBotToDelete] = useState<string | null>(null);
+  const [botToDelete, setBotToDelete] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const OpenDeleteBot = (BotId: string) => {
-    setBotToDelete(BotId);
+  const OpenDeleteBot = (bot: any) => {
+    setBotToDelete(bot);
     setIsDialogOpen(true);
   };
 
@@ -33,8 +33,8 @@ export function BotList() {
 
     setDeleting(true);
     try {
-      await deleteBot(botToDelete);
-      toast.success("Bot excluído com sucesso!");
+      await deleteBot(botToDelete._id);
+      toast.success(`Bot ${botToDelete.name} excluído com sucesso!`);
       setIsDialogOpen(false);
       setBotToDelete(null);
     } catch (error) {
@@ -124,7 +124,7 @@ export function BotList() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => OpenDeleteBot(bot._id)}
+                      onClick={() => OpenDeleteBot(bot)}
                       className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4 cursor-pointer" />
@@ -140,9 +140,9 @@ export function BotList() {
       <Modal
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        title="Confirmar exclusão do bot?"
+        title="Tem certeza que deseja excluir este bot?"
         description="Essa ação é irreversível."
-        confirmText="Confirmar Exclusão"
+        confirmText="Tenho"
         onConfirm={async () => {
           await handleConfirmDelete();
         }}
