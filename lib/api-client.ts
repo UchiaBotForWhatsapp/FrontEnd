@@ -77,7 +77,7 @@ function extractTokenFromResponse(res: any): string | null {
 export const authApi = {
   login: (email: string, password: string) =>
     (async (email: string, password: string) => {
-      const res: any = await apiCall("/auth/login", {
+      const res: any = await apiCall("/auth/sign-in", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
