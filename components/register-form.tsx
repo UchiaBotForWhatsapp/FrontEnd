@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { TermsModal } from "./terms-modal";
-import { LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { COUNTRIES_WITH_DDI, getDDIByCountry } from "@/lib/country-data";
 
 export function RegisterForm() {
@@ -50,6 +50,19 @@ export function RegisterForm() {
     termsAccepted: false,
     ddi: "",
   });
+
+  const [showPassword, setSwowPasword] = useState(false)
+  const [showConfirmPassword, setShowComfirmPassword] = useState(false)
+
+
+
+  function togglePassword() {
+    setSwowPasword(prev => !prev);
+  }
+
+  function toggleConfimPassword() {
+    setShowComfirmPassword(prev => !prev);
+  }
 
   /* =====================
      Input handler
@@ -333,24 +346,49 @@ export function RegisterForm() {
                 className={formData.ddi ? "pl-16" : ""}
               />
             </div>
+            <div className="relative">
+              <Input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Senha"
+                value={formData.password}
+                onChange={handleInputChange}
+                disabled={loading}
+                className="pr-10"
 
-            <Input
-              name="password"
-              type="password"
-              placeholder="Senha"
-              value={formData.password}
-              onChange={handleInputChange}
-              disabled={loading}
-            />
 
-            <Input
-              name="confirmPassword"
-              type="password"
-              placeholder="Confirmar senha"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              disabled={loading}
-            />
+              />
+              <button
+                type="button"
+                onClick={togglePassword}
+                aria-label={showPassword ? "ocultar senha" : "mostrar senha"}
+
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500  cursor-pointer  border-none p-0 bg-transparent">
+                {showPassword ? <EyeOff className="w-5 h-5 " /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirmar senha"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                disabled={loading}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={toggleConfimPassword}
+                aria-label={showConfirmPassword ? "ocultar senha" : "Mostrar senha"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500  cursor-pointer border-none p-0 bg-transparent"
+
+              >
+                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+
+
+              </button>
+            </div>
 
             {/* Terms & Conditions */}
             <div className="flex items-start space-x-2">
