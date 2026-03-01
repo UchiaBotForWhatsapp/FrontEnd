@@ -1,37 +1,37 @@
-import { Button } from "./ui/button";
+import type React from "react";
+import type { VariantProps } from "class-variance-authority";
+import { Button, buttonVariants } from "./ui/button";
+import { cn } from "@/lib/utils";
 
-
-interface LoadingButton {
-    children: React.ReactNode;
-    loading: boolean;
-    onClick?: () => void;
-    type: "button" | "submit" | "reset";
-    className?: string;
-    disabled?: boolean;
-
-
-
+interface LoadingButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
+  children: React.ReactNode;
+  loading: boolean;
 }
 
-export function LoadingButton({ children, loading, onClick, type = "button", className = "", disabled = false }: LoadingButton) {
-    return (
-        <Button
-            type={type}
-            onClick={onClick}
-            disabled={loading || disabled}
-
-            className={`px-4 py-4  text-white rounded-md disabled:opacity-60 flex items-center gap-2 transition-all ${className}`}
-
-
-        >
-            {loading ? (
-                <div className="w-5 h-5  border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-                children
-            )}
-
-
-        </ Button>
-    )
-
+export function LoadingButton({
+  children,
+  loading,
+  className,
+  disabled,
+  variant,
+  size,
+  ...props
+}: LoadingButtonProps) {
+  return (
+    <Button
+      variant={variant}
+      size={size}
+      disabled={loading || disabled}
+      className={cn("gap-2 disabled:opacity-60", className)}
+      {...props}
+    >
+      {loading ? (
+        <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+      ) : (
+        children
+      )}
+    </Button>
+  );
 }

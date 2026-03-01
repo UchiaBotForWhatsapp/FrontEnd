@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -13,15 +13,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { useBots } from "@/hooks/use-bots";
-import { Trash2, Edit2, Plus } from "lucide-react";
+import { Trash2, Edit2, Plus, Power } from "lucide-react";
 import { Modal } from "./modal";
 import { toast } from "sonner";
+import { LoadingButton } from "./loading-button";
+import { WhatsappConnectModal } from "./whatsapp-connect-modal";
 
 export function BotList() {
-  const { bots, isLoading, deleteBot } = useBots();
+  const { bots, isLoading, deleteBot, toggleBot } = useBots();
   const [botToDelete, setBotToDelete] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [qrStatus, setQrStatus] = useState<"waiting" | "connected" | "error">(
+    "waiting",
+  );
 
   const OpenDeleteBot = (bot: any) => {
     setBotToDelete(bot);
@@ -45,8 +53,46 @@ export function BotList() {
     }
   };
 
+  const handleToggleBot = async (bot: any) => {
+    setTogglingId(bot._id);
+    try {
+      const updated: any = await toggleBot(bot._id);
+
+      if (updated?.active) {
+        setQrCode(updated?.qr || updated?.qrcode || null);
+        setQrStatus("waiting");
+        setQrModalOpen(true);
+        toast.success(`Bot ${updated.name} ativado com sucesso!`);
+      } else {
+        toast.success(`Bot ${updated.name} desativado com sucesso!`);
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar bot", error);
+      toast.error("Erro ao atualizar bot");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "B";
+    const parts = name.trim().split(" ");
+    const first = parts[0]?.[0] || "";
+    const second = parts.length > 1 ? parts[1]?.[0] || "" : "";
+    return (first + second).toUpperCase();
+  };
+
   return (
     <div className="space-y-6">
+      <WhatsappConnectModal
+        open={qrModalOpen}
+        loading={togglingId !== null}
+        qrCode={qrCode}
+        status={qrStatus}
+        onClose={() => setQrModalOpen(false)}
+        onConfirm={() => setQrModalOpen(false)}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Meus Bots</h1>
         <Link href="/dashboard/bot/new">
@@ -84,22 +130,53 @@ export function BotList() {
               className="bg-card border-border hover:border-accent/50 transition"
             >
               <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CardTitle className="text-xl">{bot.name}</CardTitle>
-                      <Badge
-                        variant={bot.active ? "default" : "secondary"}
-                        className="bg-accent"
-                      >
-                        {bot.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                      {bot.plan && <Badge variant="outline">{bot.plan}</Badge>}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="size-12 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
+                      {bot.avatar ? (
+                        <img
+                          src={bot.avatar}
+                          alt={`Avatar do bot ${bot.name}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-semibold text-muted-foreground">
+                          {getInitials(bot.name)}
+                        </span>
+                      )}
                     </div>
-                    <CardDescription className="line-clamp-2 ">
-                      {bot.description || "Sem descrição"}
-                    </CardDescription>
+
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <CardTitle className="text-xl">{bot.name}</CardTitle>
+                        <Badge
+                          variant={bot.active ? "default" : "secondary"}
+                          className="bg-accent"
+                        >
+                          {bot.active ? "Ativo" : "Inativo"}
+                        </Badge>
+                        {bot.plan && <Badge variant="outline">{bot.plan}</Badge>}
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {bot.description || "Sem descrição"}
+                      </CardDescription>
+                    </div>
                   </div>
+
+                  <LoadingButton
+                    loading={togglingId === bot._id}
+                    type="button"
+                    onClick={() => handleToggleBot(bot)}
+                    variant={bot.active ? "outline" : "default"}
+                    className={
+                      bot.active
+                        ? "border-accent text-accent hover:bg-accent/10"
+                        : "bg-accent hover:bg-accent/90"
+                    }
+                  >
+                    <Power className="w-4 h-4" />
+                    {bot.active ? "Desativar" : "Ativar"}
+                  </LoadingButton>
                 </div>
               </CardHeader>
               <CardContent>

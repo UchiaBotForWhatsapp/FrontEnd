@@ -1,7 +1,6 @@
-"use client";
+﻿"use client";
 
 import type React from "react";
-import { WhatsappConnectModal } from "./whatsapp-connect-modal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -27,17 +26,20 @@ interface BotFormProps {
 
 export function BotForm({ botId, initialData }: BotFormProps) {
   const router = useRouter();
-  const { createBot, updateBot, toggleBot } = useBots();
-  const [showWhatsappModal, setShowWhatsappModal] = useState(false);
-  const [qrCode, setQrCode] = useState<string | null>(null);
+  const { createBot, updateBot } = useBots();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [botActive, setBotActive] = useState(initialData?.active || false);
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
-    type: initialData?.type || "personal",
-    greeting: initialData?.greeting || "Olá! Como posso ajudar?",
+    channel: initialData?.channel || "whatsapp",
+    greeting: initialData?.greeting || "Ola! Como posso ajudar?",
+    phoneNumber: initialData?.phoneNumber || "",
+    language: initialData?.language || "pt",
+    type: initialData?.type || "business",
+    avatar: initialData?.avatar || "",
+    offHoursReply: initialData?.autoReplies?.offHours || "",
+    fallbackReply: initialData?.autoReplies?.fallback || "",
   });
 
   const handleChange = (
@@ -49,21 +51,41 @@ export function BotForm({ botId, initialData }: BotFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const toOptionalString = (value: string) => {
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : undefined;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!formData.name.trim()) {
-      setError("Nome do bot é obrigatório");
+      setError("Nome do bot e obrigatorio");
       return;
     }
+
+    const payload = {
+      name: formData.name.trim(),
+      description: toOptionalString(formData.description),
+      channel: formData.channel,
+      greeting: toOptionalString(formData.greeting),
+      phoneNumber: toOptionalString(formData.phoneNumber),
+      language: toOptionalString(formData.language),
+      type: formData.type,
+      avatar: toOptionalString(formData.avatar),
+      autoReplies: {
+        offHours: toOptionalString(formData.offHoursReply),
+        fallback: toOptionalString(formData.fallbackReply),
+      },
+    };
 
     setLoading(true);
     try {
       if (botId) {
-        await updateBot(botId, formData);
+        await updateBot(botId, payload);
       } else {
-        await createBot(formData);
+        await createBot(payload);
       }
       toast.success(
         `Bot ${formData.name} ${botId ? "atualizado" : "criado"} com sucesso!`,
@@ -77,39 +99,8 @@ export function BotForm({ botId, initialData }: BotFormProps) {
     }
   };
 
-  const handleToggleBot = async () => {
-    if (!botId) return;
-
-    setLoading(true);
-    try {
-      const updated: any = await toggleBot(botId);
-
-      setBotActive(updated.active);
-      setQrCode(updated.qr || null);
-
-      toast.success(
-        `Bot ${updated.name} ${updated.active ? "ativado" : "desativado"} com sucesso!`,
-      );
-    } catch (err: any) {
-      toast.error("Erro ao atualizar bot");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <WhatsappConnectModal
-        open={showWhatsappModal}
-        loading={loading}
-        qrCode={qrCode}
-        status={botActive ? "connected" : "waiting"}
-        onClose={() => setShowWhatsappModal(false)}
-        onConfirm={async () => {
-          setShowWhatsappModal(false);
-        }}
-      />
-
       <Link
         href="/dashboard"
         className="flex items-center gap-2 text-accent hover:underline w-fit"
@@ -118,31 +109,11 @@ export function BotForm({ botId, initialData }: BotFormProps) {
         Voltar
       </Link>
 
-      {botId && (
-        <div className="flex justify-end">
-          <LoadingButton
-            type="button"
-            onClick={() => {
-              if (!botActive) {
-                handleToggleBot();
-                setShowWhatsappModal(true);
-              } else {
-                setShowWhatsappModal(false);
-              }
-            }}
-            loading={loading}
-            className="bg-accent/80 hover:bg-accent/90 text-white font-semibold px-6 py-2 rounded-md cursor-pointer"
-          >
-            {botActive ? "Desativar bot" : "Ativar bot"}
-          </LoadingButton>
-        </div>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle>{botId ? "Editar Bot" : "Criar Novo Bot"}</CardTitle>
           <CardDescription>
-            Configure os detalhes básicos do seu bot WhatsApp
+            Configure os detalhes basicos do seu bot WhatsApp
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -182,19 +153,96 @@ export function BotForm({ botId, initialData }: BotFormProps) {
                   className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground disabled:opacity-50"
                 >
                   <option value="personal">Pessoal</option>
-                  <option value="business">Negócio</option>
+                  <option value="business">Negocio</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="channel" className="mb-2 block">
+                  Canal
+                </Label>
+                <select
+                  id="channel"
+                  name="channel"
+                  value={formData.channel}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground disabled:opacity-50"
+                >
+                  <option value="whatsapp">WhatsApp</option>
+                </select>
+              </div>
+
+              <div>
+                <Label htmlFor="language" className="mb-2 block">
+                  Idioma
+                </Label>
+                <select
+                  id="language"
+                  name="language"
+                  value={formData.language}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground disabled:opacity-50"
+                >
+                  <option value="pt">Portugues</option>
+                  <option value="en">English</option>
+                  <option value="es">Espanol</option>
+                  <option value="fr">Francais</option>
+                  <option value="de">Deutsch</option>
+                  <option value="it">Italiano</option>
+                  <option value="ar">Arabic</option>
+                  <option value="ru">Russian</option>
+                  <option value="hi">Hindi</option>
+                  <option value="zh">Chinese</option>
+                  <option value="ja">Japanese</option>
+                  <option value="ko">Korean</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="phoneNumber" className="mb-2 block">
+                  Numero do WhatsApp
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  placeholder="Ex: 244900000000"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="bg-secondary border-border"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="avatar" className="mb-2 block">
+                  Avatar (URL)
+                </Label>
+                <Input
+                  id="avatar"
+                  name="avatar"
+                  placeholder="https://..."
+                  value={formData.avatar}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="bg-secondary border-border"
+                />
               </div>
             </div>
 
             <div>
               <Label htmlFor="description" className="mb-2 block">
-                Descrição
+                Descricao
               </Label>
               <textarea
                 id="description"
                 name="description"
-                placeholder="Descreva o propósito do seu bot"
+                placeholder="Descreva o proposito do seu bot"
                 value={formData.description}
                 onChange={handleChange}
                 disabled={loading}
@@ -204,13 +252,13 @@ export function BotForm({ botId, initialData }: BotFormProps) {
             </div>
 
             <div>
-              <Label htmlFor="greeting_message" className="mb-2 block">
+              <Label htmlFor="greeting" className="mb-2 block">
                 Mensagem de Boas-vindas
               </Label>
               <textarea
-                id="greeting_message"
-                name="greeting_message"
-                placeholder="Mensagem de saudação do bot"
+                id="greeting"
+                name="greeting"
+                placeholder="Mensagem de saudacao do bot"
                 value={formData.greeting}
                 onChange={handleChange}
                 disabled={loading}
@@ -218,6 +266,48 @@ export function BotForm({ botId, initialData }: BotFormProps) {
                 className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground disabled:opacity-50 resize-none"
               />
             </div>
+
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-lg">Respostas Automaticas</CardTitle>
+                <CardDescription>
+                  Mensagens para horarios fora do atendimento e fallback
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="offHoursReply" className="mb-2 block">
+                    Fora do horario
+                  </Label>
+                  <textarea
+                    id="offHoursReply"
+                    name="offHoursReply"
+                    placeholder="Mensagem fora do horario"
+                    value={formData.offHoursReply}
+                    onChange={handleChange}
+                    disabled={loading}
+                    rows={3}
+                    className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground disabled:opacity-50 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="fallbackReply" className="mb-2 block">
+                    Fallback
+                  </Label>
+                  <textarea
+                    id="fallbackReply"
+                    name="fallbackReply"
+                    placeholder="Mensagem quando o bot nao entender"
+                    value={formData.fallbackReply}
+                    onChange={handleChange}
+                    disabled={loading}
+                    rows={3}
+                    className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground disabled:opacity-50 resize-none"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="flex gap-4">
               <LoadingButton

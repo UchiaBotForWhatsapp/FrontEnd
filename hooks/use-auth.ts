@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { authApi } from "@/lib/api-client";
+import { authApi, clearAuthToken } from "@/lib/api-client";
 
 export function useAuth() {
   const [user, setUser] = useState<any>(null);
@@ -14,7 +14,6 @@ export function useAuth() {
     try {
       const response = await authApi.login(email, password);
       setUser(response.user);
-      localStorage.setItem("auth_token", response.token);
       return response;
     } catch (err: any) {
       setError(err.message);
@@ -38,7 +37,7 @@ export function useAuth() {
       setLoading(true);
       setError(null);
       try {
-        // 🔑 Passando todos os campos para o client
+        // Passando todos os campos para o client
         const response = await authApi.register(
           name,
           email,
@@ -51,7 +50,6 @@ export function useAuth() {
         );
 
         setUser(response.user);
-        localStorage.setItem("auth_token", response.token);
         return response;
       } catch (err: any) {
         setError(err.message);
@@ -65,8 +63,22 @@ export function useAuth() {
 
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem("auth_token");
+    clearAuthToken();
   }, []);
 
-  return { user, loading, error, login, register, logout };
+  const googleLogin = useCallback(async (idToken: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await authApi.googleLogin(idToken);
+      setUser(response.user);
+      return response;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  return { user, loading, error, login, register, googleLogin, logout };
 }
