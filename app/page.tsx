@@ -1,15 +1,10 @@
-"use client"
-
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, MessageCircle, Zap, BarChart3 } from "lucide-react"
-import { useState } from "react"
 
 export default function Landing() {
-  const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
-
   const PLANS = [
     {
       id: "genin",
@@ -30,28 +25,10 @@ export default function Landing() {
       name: "Jonin",
       subtitle: "Plano Profissional",
       description: "Usuários de alto uso e negócios em crescimento",
-      features: ["50 bots", "500.000 mensagens/mês", "Suporte 24/7", "API completa", "Webhooks avançados"],
+      features: ["50 bots", "500.000 mensagens/mês", "Suporte 24/7"],
       popular: true,
     },
-    {
-      id: "hokage",
-      name: "Hokage",
-      subtitle: "Plano Enterprise",
-      description: "Power users e empresas em escala",
-      features: [
-        "Bots ilimitados",
-        "Mensagens ilimitadas",
-        "Suporte dedicado 24/7",
-        "API completa",
-        "Integrações customizadas",
-      ],
-    },
   ]
-
-  const handleWhatsAppTest = () => {
-    window.open("https://wa.me/5511999999999", "_blank")
-  }
-
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
@@ -101,10 +78,16 @@ export default function Landing() {
                 Criar Conta Grátis
               </Button>
             </Link>
-            <Button size="lg" variant="outline" onClick={handleWhatsAppTest}>
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Testar Bot no WhatsApp
-            </Button>
+            <a
+              href="https://wa.me/244955758961"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="lg" variant="outline">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Testar Bot no WhatsApp
+              </Button>
+            </a>
           </div>
         </div>
       </section>
@@ -246,8 +229,6 @@ export default function Landing() {
                   ? "border-2 border-accent scale-105 md:scale-110"
                   : "border border-border hover:border-accent/50"
               }`}
-              onMouseEnter={() => setHoveredPlan(plan.id)}
-              onMouseLeave={() => setHoveredPlan(null)}
             >
               {plan.popular && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground">
@@ -299,10 +280,16 @@ export default function Landing() {
                 Criar Conta Grátis
               </Button>
             </Link>
-            <Button size="lg" variant="outline" onClick={handleWhatsAppTest}>
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Testar Agora
-            </Button>
+            <a
+              href="https://wa.me/5511999999999"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="lg" variant="outline">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Testar Agora
+              </Button>
+            </a>
           </div>
         </div>
       </section>
@@ -384,3 +371,5 @@ export default function Landing() {
     </main>
   )
 }
+
+

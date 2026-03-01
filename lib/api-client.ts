@@ -1,4 +1,4 @@
-export const API_BASE_URL =
+﻿export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 let inMemoryAuthToken: string | null = null;
 
@@ -48,6 +48,7 @@ export async function apiCall<T>(
         ...defaultHeaders,
         ...((options && (options.headers as Record<string, string>)) || {}),
       };
+      void finalHeaders;
     }
   } catch (e) {
     console.error(e);
@@ -86,6 +87,16 @@ export const authApi = {
       return res;
     })(email, password),
 
+  googleLogin: (idToken: string) =>
+    (async (idToken: string) => {
+      const res: any = await apiCall("/auth/google", {
+        method: "POST",
+        body: JSON.stringify({ idToken }),
+      });
+      const token = extractTokenFromResponse(res);
+      if (token) setAuthToken(token);
+      return res;
+    })(idToken),
   register: (
     name: string,
     email: string,
@@ -122,18 +133,23 @@ export const authApi = {
     })(email, code),
 
   resendActivation: (email: string) =>
-    apiCall("/auth/resend", {
+    apiCall("/auth/resend-activation", {
       method: "POST",
       body: JSON.stringify({ email }),
     }),
 
-  getMe: () => apiCall("/auth/me"),
+  getMe: async () => {
+    const res: any = await apiCall("/auth/me");
+    return res?.user ?? res;
+  },
 
-  updateMe: (name: string, email: string) =>
-    apiCall("/auth/me", {
+  updateMe: async (name: string, email: string) => {
+    const res: any = await apiCall("/auth/me", {
       method: "PUT",
       body: JSON.stringify({ name, email }),
-    }),
+    });
+    return res?.user ?? res;
+  },
 
   updatePlan: (plan: string) =>
     apiCall("/auth/me/plan", {
@@ -165,7 +181,7 @@ export const botApi = {
     }),
 
   toggle: (id: string) =>
-    apiCall(`/bots/${id}/toggle`, {
+    apiCall(`/bots/${id}`, {
       method: "PATCH",
     }),
 };

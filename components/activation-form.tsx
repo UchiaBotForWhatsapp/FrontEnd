@@ -32,9 +32,9 @@ export function ActivationForm() {
       return
     }
 
-    const code = activationToken.trim()
-    if (!/^\d{4}$/.test(code)) {
-      setError("Insira o código de 4 dígitos")
+    const code = activationToken.trim().toUpperCase()
+    if (!/^[A-Z0-9]{6}$/.test(code)) {
+      setError("Insira o código de 6 caracteres (letras e números)")
       return
     }
 
@@ -103,15 +103,19 @@ export function ActivationForm() {
               Código de Ativação
             </label>
             <p className="text-xs text-muted-foreground mb-2">
-              Digite o código de 4 digitos enviado no seguinte email: {email}
+              Digite o código de 6 caracteres enviado no seguinte email: {email}
             </p>
             <Input
               id="token"
-              inputMode="numeric"
-              maxLength={4}
+              inputMode="text"
+              maxLength={6}
               value={activationToken}
-              onChange={(e) => setActivationToken(e.target.value.replace(/[^0-9]/g, ""))}
-              placeholder="0000"
+              onChange={(e) =>
+                setActivationToken(
+                  e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase(),
+                )
+              }
+              placeholder="ABC123"
               disabled={loading}
               className="bg-secondary border-border"
             />
@@ -125,15 +129,16 @@ export function ActivationForm() {
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <div>
               Não recebeu o código?{" "}
-              <LoadingButton
-                loading={loading}
+              <Button
                 type="button"
-                className="text-accent hover:underline"
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-accent"
                 disabled={loading || resendLoading}
                 onClick={handleResend}
               >
                 {resendLoading ? "Reenviando..." : "Reenviar email"}
-              </LoadingButton>
+              </Button>
             </div>
             {resendMessage && (
               <div className="text-xs text-muted-foreground">{resendMessage}</div>
@@ -144,3 +149,6 @@ export function ActivationForm() {
     </Card>
   )
 }
+
+
+
