@@ -104,21 +104,22 @@ export function ProductModal({
     setImagePreview("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
-    // Simulating API call
-    setTimeout(() => {
-      onSave({
+    try {
+      await onSave({
         ...formData,
         image: imagePreview,
       });
       resetForm();
-      setLoading(false);
       onClose();
-    }, 1000);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {

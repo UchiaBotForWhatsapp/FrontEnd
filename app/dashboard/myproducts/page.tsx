@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Package, Trash2, Edit2, MessageCircle } from "lucide-react";
-import { MOCK_PRODUCTS, type Product } from "@/mock/products.mock";
+import { type Product } from "@/mock/products.mock";
 import {
   Card,
   CardContent,
@@ -26,10 +26,13 @@ import { Modal } from "@/components/modal";
 import { Sidebar } from "@/components/sidebar";
 
 import { useBots } from "@/hooks/use-bots";
+import { useProducts } from "@/hooks/use-products";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function MyProductsPage() {
   const [hasMounted, setHasMounted] = useState(false);
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const { products, isLoading, createProduct, updateProduct, deleteProduct } =
+    useProducts();
   const { bots } = useBots();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
@@ -40,21 +43,17 @@ export default function MyProductsPage() {
     setHasMounted(true);
   }, []);
 
-  const handleSaveProduct = (productData: any) => {
-    if (productToEdit) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p._id === productToEdit._id ? { ...p, ...productData } : p,
-        ),
-      );
-      toast.success("Produto atualizado com sucesso!");
-    } else {
-      const newProduct: Product = {
-        _id: Math.random().toString(36).substr(2, 9),
-        ...productData,
-      };
-      setProducts((prev) => [...prev, newProduct]);
-      toast.success("Produto cadastrado com sucesso!");
+  const handleSaveProduct = async (productData: any) => {
+    try {
+      if (productToEdit) {
+        await updateProduct(productToEdit._id, productData);
+        toast.success("Produto atualizado com sucesso!");
+      } else {
+        await createProduct(productData);
+        toast.success("Produto cadastrado com sucesso!");
+      }
+    } catch (error) {
+      toast.error("Ocorreu um erro ao salvar o produto.");
     }
     setProductToEdit(null);
   };
@@ -76,14 +75,24 @@ export default function MyProductsPage() {
 
   const confirmDelete = async () => {
     if (productToDelete) {
-      setProducts((prev) => prev.filter((p) => p._id !== productToDelete._id));
-      toast.success("Produto excluído com sucesso!");
+      try {
+        await deleteProduct(productToDelete._id);
+        toast.success("Produto excluído com sucesso!");
+      } catch (error) {
+        toast.error("Ocorreu um erro ao excluir o produto.");
+      }
       setIsDeleteModalOpen(false);
       setProductToDelete(null);
     }
   };
 
-  if (!hasMounted) return null;
+  if (!hasMounted || isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Spinner className="size-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
