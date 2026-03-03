@@ -11,7 +11,6 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "U Bot - Plataforma de Chatbot WhatsApp",
   description: "Gerencie seus bots WhatsApp com facilidade",
-  generator: "v0.app",
   icons: {
     icon: [
       {
