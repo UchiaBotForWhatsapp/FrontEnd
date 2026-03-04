@@ -1,27 +1,35 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { useAuth } from "@/hooks/use-auth"
-import { MessageCircle, Settings, LogOut, Menu, X } from "lucide-react"
-import { useState } from "react"
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  MessageCircle,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Package,
+} from "lucide-react";
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { logout } = useAuth()
-  const [open, setOpen] = useState(false)
+  const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
+  const [open, setOpen] = useState(false);
 
   const navItems = [
     { href: "/dashboard", label: "Meus Bots", icon: MessageCircle },
+    { href: "/dashboard/myproducts", label: "Meus Produtos", icon: Package },
     { href: "/dashboard/settings", label: "Configurações", icon: Settings },
-  ]
+  ];
 
   const handleLogout = () => {
-    logout()
-    router.push("/login")
-  }
+    logout();
+    router.push("/login");
+  };
 
   return (
     <>
@@ -55,24 +63,23 @@ export function Sidebar() {
             className="flex items-center gap-2 hover:opacity-80 transition"
           >
             <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-              <span className="text-sidebar-primary-foreground font-bold text-sm">UB</span>
+              <span className="text-sidebar-primary-foreground font-bold text-sm">
+                UB
+              </span>
             </div>
             <h1 className="font-bold text-lg">U Bot</h1>
           </Link>
 
           {/* Botão fechar só aparece em mobile */}
-          <button
-            className="md:hidden"
-            onClick={() => setOpen(false)}
-          >
+          <button className="md:hidden" onClick={() => setOpen(false)}>
             <X className="w-6 h-6 text-sidebar-primary-foreground" />
           </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
 
             return (
               <Link
@@ -88,7 +95,7 @@ export function Sidebar() {
                 <Icon className="w-5 h-5" />
                 <span className="text-sm">{item.label}</span>
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -104,5 +111,5 @@ export function Sidebar() {
         </div>
       </aside>
     </>
-  )
+  );
 }

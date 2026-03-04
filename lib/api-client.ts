@@ -194,3 +194,26 @@ export const planApi = {
       body: JSON.stringify({ planName, status }),
     }),
 };
+
+export const productApi = {
+  list: () => apiCall("/products"),
+
+  create: (data: any) =>
+    apiCall("/products", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  get: (id: string) => apiCall(`/products/${id}`),
+
+  update: (id: string, data: any) =>
+    apiCall(`/products/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    apiCall(`/products/${id}`, {
+      method: "DELETE",
+    }),
+};
