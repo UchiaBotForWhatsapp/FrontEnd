@@ -17,15 +17,17 @@ import { Trash2, Edit2, Plus, Power } from "lucide-react";
 import { Modal } from "./modal";
 import { toast } from "sonner";
 import { LoadingButton } from "./loading-button";
+import { BotQrModal } from "./bot-qr-modal";
 import { WhatsappConnectModal } from "./whatsapp-connect-modal";
 
 export function BotList() {
-  const { bots, isLoading, deleteBot, toggleBot } = useBots();
+  const { bots, isLoading, deleteBot, toggleBot, mutate } = useBots();
   const [botToDelete, setBotToDelete] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [activeBotId, setActiveBotId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrStatus, setQrStatus] = useState<"waiting" | "connected" | "error">(
     "waiting",
@@ -54,18 +56,16 @@ export function BotList() {
   };
 
   const handleToggleBot = async (bot: any) => {
+    if (!bot.active) {
+      setActiveBotId(bot._id);
+      setQrModalOpen(true);
+      return;
+    }
+
     setTogglingId(bot._id);
     try {
       const updated: any = await toggleBot(bot._id);
-
-      if (updated?.active) {
-        setQrCode(updated?.qr || updated?.qrcode || null);
-        setQrStatus("waiting");
-        setQrModalOpen(true);
-        toast.success(`Bot ${updated.name} ativado com sucesso!`);
-      } else {
-        toast.success(`Bot ${updated.name} desativado com sucesso!`);
-      }
+      toast.success(`Bot ${updated.name} desativado com sucesso!`);
     } catch (error) {
       console.error("Erro ao atualizar bot", error);
       toast.error("Erro ao atualizar bot");
@@ -84,14 +84,31 @@ export function BotList() {
 
   return (
     <div className="space-y-6">
-      <WhatsappConnectModal
-        open={qrModalOpen}
-        loading={togglingId !== null}
-        qrCode={qrCode}
-        status={qrStatus}
-        onClose={() => setQrModalOpen(false)}
-        onConfirm={() => setQrModalOpen(false)}
-      />
+      {activeBotId && (
+        <BotQrModal
+          botId={activeBotId}
+          open={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setActiveBotId(null);
+          }}
+          onSuccess={() => {
+            mutate();
+          }}
+        />
+      )}
+
+      {/* Keeping old modal just in case, but it's now inactive */}
+      {qrCode && !activeBotId && (
+        <WhatsappConnectModal
+          open={qrModalOpen}
+          loading={togglingId !== null}
+          qrCode={qrCode}
+          status={qrStatus}
+          onClose={() => setQrModalOpen(false)}
+          onConfirm={() => setQrModalOpen(false)}
+        />
+      )}
 
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Meus Bots</h1>
@@ -155,7 +172,9 @@ export function BotList() {
                         >
                           {bot.active ? "Ativo" : "Inativo"}
                         </Badge>
-                        {bot.plan && <Badge variant="outline">{bot.plan}</Badge>}
+                        {bot.plan && (
+                          <Badge variant="outline">{bot.plan}</Badge>
+                        )}
                       </div>
                       <CardDescription className="line-clamp-2">
                         {bot.description || "Sem descrição"}
