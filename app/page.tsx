@@ -1,8 +1,8 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Check, MessageCircle, Zap, BarChart3 } from "lucide-react"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, MessageCircle, Zap, BarChart3 } from "lucide-react";
 
 export default function Landing() {
   const PLANS = [
@@ -11,14 +11,25 @@ export default function Landing() {
       name: "Genin",
       subtitle: "Plano Gratuito",
       description: "Acesso inicial, uso limitado, foco em experimentação",
-      features: ["1 bot", "100 mensagens/mês", "Suporte por email", "Dashboard básico"],
+      features: [
+        "1 bot",
+        "100 mensagens/mês",
+        "Suporte por email",
+        "Dashboard básico",
+      ],
     },
     {
       id: "chunin",
       name: "Chunin",
       subtitle: "Plano Iniciante",
       description: "Pequenas empresas e criadores pessoais",
-      features: ["5 bots", "10.000 mensagens/mês", "Suporte prioritário", "Analytics completo", "Automações avançadas"],
+      features: [
+        "5 bots",
+        "10.000 mensagens/mês",
+        "Suporte prioritário",
+        "Analytics completo",
+        "Automações avançadas",
+      ],
     },
     {
       id: "jonin",
@@ -28,7 +39,7 @@ export default function Landing() {
       features: ["50 bots", "500.000 mensagens/mês", "Suporte 24/7"],
       popular: true,
     },
-  ]
+  ];
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
@@ -36,26 +47,43 @@ export default function Landing() {
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-accent-foreground font-bold text-sm">UB</span>
+              <span className="text-accent-foreground font-bold text-sm">
+                UB
+              </span>
             </div>
             <span className="font-bold text-lg">UBot</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm hover:text-accent transition">
+            <Link
+              href="#features"
+              className="text-sm hover:text-accent transition"
+            >
               Recursos
             </Link>
-            <Link href="#exemplo" className="text-sm hover:text-accent transition">
+            <Link
+              href="#exemplo"
+              className="text-sm hover:text-accent transition"
+            >
               Exemplo
             </Link>
-            <Link href="#pricing" className="text-sm hover:text-accent transition">
+            <Link
+              href="#pricing"
+              className="text-sm hover:text-accent transition"
+            >
               Preços
             </Link>
-            <Link href="/login" className="text-sm hover:text-accent transition">
+            <Link
+              href="/login"
+              className="text-sm hover:text-accent transition"
+            >
               Login
             </Link>
           </nav>
           <Link href="/register">
-            <Button size="sm" className="bg-accent hover:bg-accent/90 text-white">
+            <Button
+              size="sm"
+              className="bg-accent hover:bg-accent/90 text-white"
+            >
               Começar Grátis
             </Button>
           </Link>
@@ -66,15 +94,19 @@ export default function Landing() {
       <section className="container px-4 py-20 md:py-32">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Gerencie seus <span className="text-accent">Bots WhatsApp</span> com Facilidade
+            Gerencie seus <span className="text-accent">Bots WhatsApp</span> com
+            Facilidade
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 text-balance">
-            Crie e gerencie bots WhatsApp profissionais sem precisar de código. Ideal para pequenas empresas e
-            empreendedores.
+            Crie e gerencie bots WhatsApp profissionais sem precisar de código.
+            Ideal para pequenas empresas e empreendedores.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-white"
+              >
                 Criar Conta Grátis
               </Button>
             </Link>
@@ -93,8 +125,13 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container px-4 py-20 border-t border-border">
-        <h2 className="text-3xl font-bold mb-12 text-center">Recursos Principais</h2>
+      <section
+        id="features"
+        className="container px-4 py-20 border-t border-border"
+      >
+        <h2 className="text-3xl font-bold mb-12 text-center">
+          Recursos Principais
+        </h2>
         <div className="grid md:grid-cols-4 gap-6">
           {[
             {
@@ -102,24 +139,44 @@ export default function Landing() {
               title: "Fácil de Usar",
               description: "Interface intuitiva para criar e gerenciar bots",
             },
-            { icon: Zap, title: "Múltiplos Bots", description: "Gerencie vários bots em uma única plataforma" },
-            { icon: BarChart3, title: "Análises", description: "Acompanhe o desempenho e estatísticas de seus bots" },
-            { icon: Check, title: "Suporte 24/7", description: "Equipe pronta para ajudar no seu sucesso" },
+            {
+              icon: Zap,
+              title: "Múltiplos Bots",
+              description: "Gerencie vários bots em uma única plataforma",
+            },
+            {
+              icon: BarChart3,
+              title: "Análises",
+              description: "Acompanhe o desempenho e estatísticas de seus bots",
+            },
+            {
+              icon: Check,
+              title: "Suporte 24/7",
+              description: "Equipe pronta para ajudar no seu sucesso",
+            },
           ].map((feature, i) => {
-            const Icon = feature.icon
+            const Icon = feature.icon;
             return (
-              <div key={i} className="p-6 rounded-lg border border-border bg-card hover:border-accent/50 transition">
+              <div
+                key={i}
+                className="p-6 rounded-lg border border-border bg-card hover:border-accent/50 transition"
+              >
                 <Icon className="w-8 h-8 text-accent mb-3" />
                 <h3 className="font-bold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
+                <p className="text-muted-foreground text-sm">
+                  {feature.description}
+                </p>
               </div>
-            )
+            );
           })}
         </div>
       </section>
 
       {/* Example Section - WhatsApp Chat Layout */}
-      <section id="exemplo" className="container px-4 py-20 border-t border-border">
+      <section
+        id="exemplo"
+        className="container px-4 py-20 border-t border-border"
+      >
         <h2 className="text-3xl font-bold mb-12 text-center">Como Funciona</h2>
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
@@ -130,7 +187,9 @@ export default function Landing() {
                 </span>
                 Criar seu Bot
               </h3>
-              <p className="text-muted-foreground">Defina o nome, tipo e comportamento do seu bot em minutos</p>
+              <p className="text-muted-foreground">
+                Defina o nome, tipo e comportamento do seu bot em minutos
+              </p>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
@@ -139,7 +198,9 @@ export default function Landing() {
                 </span>
                 Configurar Respostas
               </h3>
-              <p className="text-muted-foreground">Crie fluxos de conversação personalizados com IA</p>
+              <p className="text-muted-foreground">
+                Crie fluxos de conversação personalizados com IA
+              </p>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
@@ -148,7 +209,9 @@ export default function Landing() {
                 </span>
                 Conectar ao WhatsApp
               </h3>
-              <p className="text-muted-foreground">Integre seu bot e comece a atender clientes automaticamente</p>
+              <p className="text-muted-foreground">
+                Integre seu bot e comece a atender clientes automaticamente
+              </p>
             </div>
           </div>
 
@@ -168,31 +231,41 @@ export default function Landing() {
             <div className="p-4 space-y-4 h-80 overflow-y-auto bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><defs><pattern id=%22grid%22 width=%2220%22 height=%2220%22 patternUnits=%22userSpaceOnUse%22><path d=%22M 20 0 L 0 0 0 20%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.02)%22 strokeWidth=%220.5%22/></pattern></defs><rect width=%22100%22 height=%22100%22 fill=%22currentColor%22/><rect width=%22100%22 height=%22100%22 fill=%22url(%23grid)%22/></svg>')]">
               <div className="flex justify-start">
                 <div className="max-w-xs bg-muted rounded-3xl rounded-bl-none p-3">
-                  <p className="text-sm">Olá! 👋 Como posso ajudar você hoje?</p>
+                  <p className="text-sm">
+                    Olá! 👋 Como posso ajudar você hoje?
+                  </p>
                 </div>
               </div>
 
               <div className="flex justify-end">
                 <div className="max-w-xs bg-accent rounded-3xl rounded-br-none p-3 text-accent-foreground">
-                  <p className="text-sm">Preciso saber o horário de funcionamento</p>
+                  <p className="text-sm">
+                    Preciso saber o horário de funcionamento
+                  </p>
                 </div>
               </div>
 
               <div className="flex justify-start">
                 <div className="max-w-xs bg-muted rounded-3xl rounded-bl-none p-3">
-                  <p className="text-sm">Funcionamos das 8h às 18h, seg-sex 📅</p>
+                  <p className="text-sm">
+                    Funcionamos das 8h às 18h, seg-sex 📅
+                  </p>
                 </div>
               </div>
 
               <div className="flex justify-end">
                 <div className="max-w-xs bg-accent rounded-3xl rounded-br-none p-3 text-accent-foreground">
-                  <p className="text-sm">Obrigado! Vocês têm suporte por chat?</p>
+                  <p className="text-sm">
+                    Obrigado! Vocês têm suporte por chat?
+                  </p>
                 </div>
               </div>
 
               <div className="flex justify-start">
                 <div className="max-w-xs bg-muted rounded-3xl rounded-bl-none p-3">
-                  <p className="text-sm">Sim! Suporte 24/7 para todos os clientes 🎉</p>
+                  <p className="text-sm">
+                    Sim! Suporte 24/7 para todos os clientes 🎉
+                  </p>
                 </div>
               </div>
             </div>
@@ -214,19 +287,24 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="container px-4 py-20 border-t border-border">
+      <section
+        id="pricing"
+        className="container px-4 py-20 border-t border-border"
+      >
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-3">Escolha Seu Plano</h2>
-          <p className="text-muted-foreground">Comece grátis e escale conforme necessário</p>
+          <p className="text-muted-foreground">
+            Comece grátis e escale conforme necessário
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {PLANS.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative flex flex-col transition-all duration-300 ${
+              className={`relative flex flex-col transition-all duration-300 mx-auto w-full max-w-[340px] md:max-w-none ${
                 plan.popular
-                  ? "border-2 border-accent scale-105 md:scale-110"
+                  ? "border-2 border-accent scale-105 md:scale-110 z-10"
                   : "border border-border hover:border-accent/50"
               }`}
             >
@@ -237,8 +315,12 @@ export default function Landing() {
               )}
               <div className="p-6 border-b border-border">
                 <h3 className="font-bold text-2xl mb-1">{plan.name}</h3>
-                <p className="text-accent text-sm font-semibold mb-2">{plan.subtitle}</p>
-                <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
+                <p className="text-accent text-sm font-semibold mb-2">
+                  {plan.subtitle}
+                </p>
+                <p className="text-muted-foreground text-sm mb-4">
+                  {plan.description}
+                </p>
               </div>
               <div className="p-6 flex-1 flex flex-col">
                 <ul className="space-y-3 mb-6 flex-1">
@@ -262,7 +344,8 @@ export default function Landing() {
 
         <div className="text-center mt-12">
           <p className="text-muted-foreground">
-            Todos os planos incluem 30 dias de teste grátis. Sem cartão de crédito necessário.
+            Todos os planos incluem 30 dias de teste grátis. Sem cartão de
+            crédito necessário.
           </p>
         </div>
       </section>
@@ -272,11 +355,15 @@ export default function Landing() {
         <div className="bg-card border border-accent/30 rounded-lg p-8 md:p-12 text-center">
           <h2 className="text-3xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Junte-se a milhares de empresas que já estão automatizando seu atendimento com U Bot
+            Junte-se a milhares de empresas que já estão automatizando seu
+            atendimento com U Bot
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-white"
+              >
                 Criar Conta Grátis
               </Button>
             </Link>
@@ -301,27 +388,40 @@ export default function Landing() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center">
-                  <span className="text-accent-foreground font-bold text-xs">UB</span>
+                  <span className="text-accent-foreground font-bold text-xs">
+                    UB
+                  </span>
                 </div>
                 <span className="font-bold">U Bot</span>
               </div>
-              <p className="text-sm text-muted-foreground">Plataforma inteligente de automação WhatsApp</p>
+              <p className="text-sm text-muted-foreground">
+                Plataforma inteligente de automação WhatsApp
+              </p>
             </div>
             <div>
               <h4 className="font-semibold mb-3 text-sm">Produto</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="#features" className="hover:text-accent transition">
+                  <Link
+                    href="#features"
+                    className="hover:text-accent transition"
+                  >
                     Recursos
                   </Link>
                 </li>
                 <li>
-                  <Link href="#pricing" className="hover:text-accent transition">
+                  <Link
+                    href="#pricing"
+                    className="hover:text-accent transition"
+                  >
                     Preços
                   </Link>
                 </li>
                 <li>
-                  <Link href="#exemplo" className="hover:text-accent transition">
+                  <Link
+                    href="#exemplo"
+                    className="hover:text-accent transition"
+                  >
                     Exemplo
                   </Link>
                 </li>
@@ -369,7 +469,5 @@ export default function Landing() {
         </div>
       </footer>
     </main>
-  )
+  );
 }
-
-

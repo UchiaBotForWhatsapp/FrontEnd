@@ -1,65 +1,65 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Spinner } from "@/components/ui/spinner"
-import { Check } from "lucide-react"
-import { useState, useEffect } from "react"
-import { authApi } from "@/lib/api-client"
-import PLANS from "@/mock/plans.mock"
+} from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { authApi } from "@/lib/api-client";
+import PLANS from "@/mock/plans.mock";
 
 interface User {
-  id: string
-  name: string
-  email: string
-  plan: string
+  id: string;
+  name: string;
+  email: string;
+  plan: string;
 }
 
 // Normaliza o plano vindo do backend
 const normalizeUserPlan = (plan?: string): keyof typeof PLANS => {
-  if (!plan) return "genin"
+  if (!plan) return "genin";
 
   if (plan.startsWith("pending(")) {
-    return plan.replace("pending(", "").replace(")", "") as keyof typeof PLANS
+    return plan.replace("pending(", "").replace(")", "") as keyof typeof PLANS;
   }
 
-  return plan as keyof typeof PLANS
-}
+  return plan as keyof typeof PLANS;
+};
 
 export default function WelcomePage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await authApi.getMe()
-        setUser(userData as User)
+        const userData = await authApi.getMe();
+        setUser(userData as User);
       } catch (error) {
-        console.error("Failed to fetch user data:", error)
+        console.error("Failed to fetch user data:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUser()
-  }, [])
+    fetchUser();
+  }, []);
 
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <Spinner className="size-8" />
       </main>
-    )
+    );
   }
 
   if (!user) {
@@ -67,41 +67,37 @@ export default function WelcomePage() {
       <main className="min-h-screen flex items-center justify-center">
         <p>Erro ao carregar dados do usuário.</p>
       </main>
-    )
+    );
   }
 
-  const planKey = normalizeUserPlan(user.plan)
-  const plan = PLANS[planKey]
+  const planKey = normalizeUserPlan(user.plan);
+  const plan = PLANS[planKey];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-card py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <main className="min-h-screen bg-gradient-to-b from-background to-card py-6 sm:py-12 px-4 flex flex-col items-center justify-center">
+      <div className="w-full max-w-2xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4 mb-8">
-          <h1 className="text-4xl font-bold text-accent">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-accent px-2">
             Bem-vindo ao UBot
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-lg sm:text-xl text-muted-foreground">
             Você está no plano{" "}
-            <span className="font-semibold text-accent">
-              {plan.name}
-            </span>
+            <span className="font-semibold text-accent">{plan.name}</span>
           </p>
         </div>
 
         {/* Card do Plano */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-2xl">
+        <Card className="w-full">
+          <CardHeader className="text-center sm:text-left">
+            <CardTitle className="text-xl sm:text-2xl">
               Seu Plano {plan.name}
             </CardTitle>
-            <CardDescription>
-              {plan.description}
-            </CardDescription>
+            <CardDescription>{plan.description}</CardDescription>
           </CardHeader>
 
           <CardContent>
-            <div className="text-3xl font-bold mb-4">
+            <div className="text-2xl sm:text-3xl font-bold mb-4 text-center sm:text-left">
               kz {plan.price.toLocaleString()}
               <span className="text-base text-muted-foreground font-normal">
                 /mês
@@ -110,7 +106,10 @@ export default function WelcomePage() {
 
             <ul className="space-y-3">
               {plan.features.map((feature, i) => (
-                <li key={i} className="flex gap-2 text-sm">
+                <li
+                  key={i}
+                  className="flex gap-2 text-sm justify-center sm:justify-start"
+                >
                   <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <span>{feature}</span>
                 </li>
@@ -120,18 +119,18 @@ export default function WelcomePage() {
         </Card>
 
         {/* CTA */}
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground">
+        <div className="text-center space-y-4 pt-4">
+          <p className="text-sm sm:text-base text-muted-foreground px-4">
             Seu ambiente já está pronto. Hora de executar.
           </p>
           <Button
             onClick={() => router.push("/dashboard")}
-            className="bg-accent hover:bg-accent/90"
+            className="bg-accent hover:bg-accent/90 w-full sm:w-auto min-w-[200px]"
           >
             Ir para o Dashboard
           </Button>
         </div>
       </div>
     </main>
-  )
+  );
 }
