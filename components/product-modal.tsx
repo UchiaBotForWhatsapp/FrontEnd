@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBots } from "@/hooks/use-bots";
-import { ImagePlus, X, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ImagePlus, X, AlertCircle } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
 interface ProductModalProps {
@@ -42,11 +42,13 @@ export function ProductModal({
     name: "",
     description: "",
     stock: 0,
+    price: 0,
     botId: "",
   });
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const imageObjectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (initialData && isOpen) {
@@ -54,14 +56,23 @@ export function ProductModal({
         name: initialData.name || "",
         description: initialData.description || "",
         stock: initialData.stock || 0,
+        price: initialData.price || 0,
         botId: initialData.botId || "",
       });
       setImagePreview(initialData.image || "");
-      setImage(null); // Assuming image is handled by preview if not changed
+      setImage(null);
     } else if (isOpen) {
       resetForm();
     }
   }, [initialData, isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (imageObjectUrlRef.current) {
+        URL.revokeObjectURL(imageObjectUrlRef.current);
+      }
+    };
+  }, []);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -69,6 +80,7 @@ export function ProductModal({
     if (!formData.description.trim())
       newErrors.description = "Descrição é obrigatória";
     if (formData.stock < 0) newErrors.stock = "Estoque não pode ser negativo";
+    if (formData.price < 0) newErrors.price = "Preço não pode ser negativo";
     if (!formData.botId) newErrors.botId = "Selecione um Bot";
     if (!imagePreview) newErrors.image = "Foto do produto é obrigatória";
 
@@ -78,28 +90,37 @@ export function ProductModal({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
-        setErrors((prev) => ({
-          ...prev,
-          image: "Apenas arquivos .jpg, .jpeg ou .png são permitidos",
-        }));
-        return;
-      }
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      setErrors((prev) => {
-        const { image, ...rest } = prev;
-        return rest;
-      });
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "Apenas imagens são permitidas",
+      }));
+      return;
     }
+
+    if (imageObjectUrlRef.current) {
+      URL.revokeObjectURL(imageObjectUrlRef.current);
+      imageObjectUrlRef.current = null;
+    }
+
+    setImage(file);
+    const previewUrl = URL.createObjectURL(file);
+    imageObjectUrlRef.current = previewUrl;
+    setImagePreview(previewUrl);
+
+    setErrors((prev) => {
+      const { image: _image, ...rest } = prev;
+      return rest;
+    });
   };
 
   const removeImage = () => {
+    if (imageObjectUrlRef.current) {
+      URL.revokeObjectURL(imageObjectUrlRef.current);
+      imageObjectUrlRef.current = null;
+    }
     setImage(null);
     setImagePreview("");
   };
@@ -110,10 +131,15 @@ export function ProductModal({
 
     setLoading(true);
     try {
-      await onSave({
-        ...formData,
-        image: imagePreview,
-      });
+      const form = new FormData();
+      form.append("name", formData.name.trim());
+      form.append("description", formData.description.trim());
+      form.append("stock", String(formData.stock));
+      form.append("price", String(formData.price));
+      form.append("botId", formData.botId);
+      if (image) form.append("image", image);
+
+      await onSave(form);
       resetForm();
       onClose();
     } catch (error) {
@@ -127,6 +153,7 @@ export function ProductModal({
       name: "",
       description: "",
       stock: 0,
+      price: 0,
       botId: "",
     });
     setImage(null);
@@ -134,12 +161,14 @@ export function ProductModal({
     setErrors({});
   };
 
+  const hasImage = Boolean(imagePreview || image);
   const isFormValid =
     formData.name &&
     formData.description &&
     formData.botId &&
-    image &&
-    formData.stock >= 0;
+    hasImage &&
+    formData.stock >= 0 &&
+    formData.price >= 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -212,53 +241,74 @@ export function ProductModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="product-bot">Bot Vinculado</Label>
-              <Select
-                value={formData.botId}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, botId: value })
+              <Label htmlFor="product-price">Preço</Label>
+              <Input
+                id="product-price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    price: parseFloat(e.target.value) || 0,
+                  })
                 }
-              >
-                <SelectTrigger
-                  className={
-                    errors.botId ? "border-destructive w-full" : "w-full"
-                  }
-                >
-                  <SelectValue
-                    placeholder={
-                      isLoadingBots ? "Carregando bots..." : "Selecione um Bot"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {isLoadingBots ? (
-                    <div className="p-2 flex items-center justify-center">
-                      <Spinner className="size-4" />
-                    </div>
-                  ) : bots.length === 0 ? (
-                    <div className="p-2 text-sm text-center text-muted-foreground">
-                      Nenhum bot encontrado
-                    </div>
-                  ) : (
-                    bots.map((bot: any) => (
-                      <SelectItem key={bot._id} value={bot._id}>
-                        {bot.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {errors.botId && (
+                className={errors.price ? "border-destructive" : ""}
+              />
+              {errors.price && (
                 <p className="text-xs text-destructive flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> {errors.botId}
-                </p>
-              )}
-              {bots.length === 0 && !isLoadingBots && (
-                <p className="text-xs text-amber-500">
-                  Cadastre um bot primeiro para vincular produtos.
+                  <AlertCircle className="w-3 h-3" /> {errors.price}
                 </p>
               )}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="product-bot">Bot Vinculado</Label>
+            <Select
+              value={formData.botId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, botId: value })
+              }
+            >
+              <SelectTrigger
+                className={errors.botId ? "border-destructive w-full" : "w-full"}
+              >
+                <SelectValue
+                  placeholder={
+                    isLoadingBots ? "Carregando bots..." : "Selecione um Bot"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {isLoadingBots ? (
+                  <div className="p-2 flex items-center justify-center">
+                    <Spinner className="size-4" />
+                  </div>
+                ) : bots.length === 0 ? (
+                  <div className="p-2 text-sm text-center text-muted-foreground">
+                    Nenhum bot encontrado
+                  </div>
+                ) : (
+                  bots.map((bot: any) => (
+                    <SelectItem key={bot._id} value={bot._id}>
+                      {bot.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {errors.botId && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> {errors.botId}
+              </p>
+            )}
+            {bots.length === 0 && !isLoadingBots && (
+              <p className="text-xs text-amber-500">
+                Cadastre um bot primeiro para vincular produtos.
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -275,12 +325,12 @@ export function ProductModal({
                   Clique para fazer upload
                 </span>
                 <span className="text-xs text-muted-foreground/60">
-                  Apenas JPG ou PNG
+                  Apenas imagens
                 </span>
                 <input
                   id="product-image"
                   type="file"
-                  accept="image/jpeg, image/jpg, image/png"
+                  accept="image/*"
                   className="hidden"
                   onChange={handleImageChange}
                 />

@@ -174,6 +174,9 @@ export default function MyProductsPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 mt-auto">
+                    <div className="text-sm font-semibold text-foreground">
+                      Preço: {product.price ?? 0}
+                    </div>
                     <div className="flex items-center justify-between pt-3 border-t border-border/50">
                       <span className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1.5 truncate pr-2">
                         <MessageCircle className="w-3 h-3 text-accent shrink-0" />
@@ -226,3 +229,4 @@ export default function MyProductsPage() {
     </div>
   );
 }
+

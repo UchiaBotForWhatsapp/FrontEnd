@@ -20,7 +20,8 @@ export default function EditBotPage({ params }: BotPageProps) {
     const fetchBot = async () => {
       try {
         const data = await botApi.get(id)
-        setBotData(data)
+        const bot = data?.bot ?? data?.data?.bot ?? data?.data ?? data
+        setBotData(bot)
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -64,3 +65,4 @@ export default function EditBotPage({ params }: BotPageProps) {
     </div>
   )
 }
+
