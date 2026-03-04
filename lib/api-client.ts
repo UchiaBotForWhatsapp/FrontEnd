@@ -1,4 +1,4 @@
-﻿export const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 let inMemoryAuthToken: string | null = null;
 
@@ -27,9 +27,13 @@ export async function apiCall<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   const auth = getAuthToken();
-  const defaultHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  const isFormData =
+    typeof FormData !== "undefined" && options?.body instanceof FormData;
+  const defaultHeaders: Record<string, string> = isFormData
+    ? {}
+    : {
+        "Content-Type": "application/json",
+      };
   if (auth) defaultHeaders["Authorization"] = `Bearer ${auth}`;
   const response = await fetch(url, {
     headers: {
@@ -161,19 +165,23 @@ export const authApi = {
 export const botApi = {
   list: () => apiCall("/bots"),
 
-  create: (data: any) =>
-    apiCall("/bots", {
+  create: (data: any) => {
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    return apiCall("/bots", {
       method: "POST",
-      body: JSON.stringify(data),
-    }),
+      body,
+    });
+  },
 
   get: (id: string) => apiCall(`/bots/${id}`),
 
-  update: (id: string, data: any) =>
-    apiCall(`/bots/${id}`, {
+  update: (id: string, data: any) => {
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    return apiCall(`/bots/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
-    }),
+      body,
+    });
+  },
 
   delete: (id: string) =>
     apiCall(`/bots/${id}`, {
@@ -198,19 +206,23 @@ export const planApi = {
 export const productApi = {
   list: () => apiCall("/products"),
 
-  create: (data: any) =>
-    apiCall("/products", {
+  create: (data: any) => {
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    return apiCall("/products", {
       method: "POST",
-      body: JSON.stringify(data),
-    }),
+      body,
+    });
+  },
 
   get: (id: string) => apiCall(`/products/${id}`),
 
-  update: (id: string, data: any) =>
-    apiCall(`/products/${id}`, {
+  update: (id: string, data: any) => {
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+    return apiCall(`/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
-    }),
+      body,
+    });
+  },
 
   delete: (id: string) =>
     apiCall(`/products/${id}`, {

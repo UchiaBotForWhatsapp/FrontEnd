@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -24,23 +24,50 @@ interface BotFormProps {
   initialData?: any;
 }
 
+function createFormState(data?: any) {
+  return {
+    name: data?.name || "",
+    description: data?.description || "",
+    channel: data?.channel || "whatsapp",
+    greeting: data?.greeting || "Ola! Como posso ajudar?",
+    phoneNumber: data?.phoneNumber || "",
+    language: data?.language || "pt",
+    type: data?.type || "business",
+    offHoursReply: data?.autoReplies?.offHours || "",
+    fallbackReply: data?.autoReplies?.fallback || "",
+  };
+}
+
 export function BotForm({ botId, initialData }: BotFormProps) {
   const router = useRouter();
   const { createBot, updateBot } = useBots();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    name: initialData?.name || "",
-    description: initialData?.description || "",
-    channel: initialData?.channel || "whatsapp",
-    greeting: initialData?.greeting || "Ola! Como posso ajudar?",
-    phoneNumber: initialData?.phoneNumber || "",
-    language: initialData?.language || "pt",
-    type: initialData?.type || "business",
-    avatar: initialData?.avatar || "",
-    offHoursReply: initialData?.autoReplies?.offHours || "",
-    fallbackReply: initialData?.autoReplies?.fallback || "",
-  });
+  const [formData, setFormData] = useState(() => createFormState(initialData));
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState(
+    initialData?.avatar || "",
+  );
+  const avatarObjectUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!initialData) return;
+    setFormData(createFormState(initialData));
+    setAvatarFile(null);
+    if (avatarObjectUrlRef.current) {
+      URL.revokeObjectURL(avatarObjectUrlRef.current);
+      avatarObjectUrlRef.current = null;
+    }
+    setAvatarPreview(initialData?.avatar || "");
+  }, [initialData]);
+
+  useEffect(() => {
+    return () => {
+      if (avatarObjectUrlRef.current) {
+        URL.revokeObjectURL(avatarObjectUrlRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -49,6 +76,34 @@ export function BotForm({ botId, initialData }: BotFormProps) {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+
+    setError("");
+
+    if (avatarObjectUrlRef.current) {
+      URL.revokeObjectURL(avatarObjectUrlRef.current);
+      avatarObjectUrlRef.current = null;
+    }
+
+    if (file && !file.type.startsWith("image/")) {
+      setError("Apenas fotos sao permitidas");
+      setAvatarFile(null);
+      setAvatarPreview(initialData?.avatar || "");
+      return;
+    }
+
+    setAvatarFile(file);
+
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      avatarObjectUrlRef.current = previewUrl;
+      setAvatarPreview(previewUrl);
+    } else {
+      setAvatarPreview(initialData?.avatar || "");
+    }
   };
 
   const toOptionalString = (value: string) => {
@@ -65,7 +120,12 @@ export function BotForm({ botId, initialData }: BotFormProps) {
       return;
     }
 
-    const payload = {
+    const autoReplies = {
+      offHours: toOptionalString(formData.offHoursReply),
+      fallback: toOptionalString(formData.fallbackReply),
+    };
+
+    const payload: any = {
       name: formData.name.trim(),
       description: toOptionalString(formData.description),
       channel: formData.channel,
@@ -73,19 +133,32 @@ export function BotForm({ botId, initialData }: BotFormProps) {
       phoneNumber: toOptionalString(formData.phoneNumber),
       language: toOptionalString(formData.language),
       type: formData.type,
-      avatar: toOptionalString(formData.avatar),
-      autoReplies: {
-        offHours: toOptionalString(formData.offHoursReply),
-        fallback: toOptionalString(formData.fallbackReply),
-      },
+    };
+
+    if (autoReplies.offHours || autoReplies.fallback) {
+      payload.autoReplies = autoReplies;
+    }
+
+    const buildFormData = () => {
+      const form = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (key === "autoReplies") {
+          form.append(key, JSON.stringify(value));
+          return;
+        }
+        form.append(key, String(value));
+      });
+      if (avatarFile) form.append("avatar", avatarFile);
+      return form;
     };
 
     setLoading(true);
     try {
       if (botId) {
-        await updateBot(botId, payload);
+        await updateBot(botId, avatarFile ? buildFormData() : payload);
       } else {
-        await createBot(payload);
+        await createBot(avatarFile ? buildFormData() : payload);
       }
       toast.success(
         `Bot ${formData.name} ${botId ? "atualizado" : "criado"} com sucesso!`,
@@ -221,17 +294,26 @@ export function BotForm({ botId, initialData }: BotFormProps) {
 
               <div>
                 <Label htmlFor="avatar" className="mb-2 block">
-                  Avatar (URL)
+                  Avatar (Foto)
                 </Label>
                 <Input
                   id="avatar"
                   name="avatar"
-                  placeholder="https://..."
-                  value={formData.avatar}
-                  onChange={handleChange}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
                   disabled={loading}
                   className="bg-secondary border-border"
                 />
+                {avatarPreview && (
+                  <div className="mt-3 flex items-center gap-3">
+                    <img
+                      src={avatarPreview}
+                      alt="Preview do avatar"
+                      className="h-14 w-14 rounded-full object-cover border border-border"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
