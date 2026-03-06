@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 interface WhatsappConnectModalProps {
-  open: boolean
-  loading?: boolean
-  qrCode?: string | null // base64 ou URL
-  status?: "waiting" | "connected" | "error"
-  onClose: () => void
-  onConfirm: () => void
+  open: boolean;
+  loading?: boolean;
+  qrCode?: string | null;
+  status?: "waiting" | "connected" | "error";
+  onClose: () => void;
+  onConfirm: () => void;
 }
 
 export function WhatsappConnectModal({
@@ -19,11 +19,11 @@ export function WhatsappConnectModal({
   onClose,
   onConfirm,
 }: WhatsappConnectModalProps) {
-  if (!open) return null
+  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background rounded-xl shadow-lg w-full max-w-lg p-6 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-background rounded-xl shadow-lg w-full max-w-lg p-4 sm:p-6 space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Conectar WhatsApp</h2>
@@ -35,7 +35,6 @@ export function WhatsappConnectModal({
           </button>
         </div>
 
-        {/* QR Code */}
         <div className="flex justify-center">
           {qrCode ? (
             <img
@@ -50,7 +49,6 @@ export function WhatsappConnectModal({
           )}
         </div>
 
-        {/* Status */}
         {status === "connected" && (
           <p className="text-sm text-green-500 text-center font-medium">
             WhatsApp conectado com sucesso
@@ -63,15 +61,15 @@ export function WhatsappConnectModal({
           </p>
         )}
 
-        {/* Diretrizes */}
         <div className="text-sm text-muted-foreground space-y-2">
           <p>• Abra o WhatsApp no seu telemóvel</p>
-          <p>• Vá em <strong>Dispositivos conectados</strong></p>
+          <p>
+            • Vá em <strong>Dispositivos conectados</strong>
+          </p>
           <p>• Aponte a câmera para o QR Code</p>
           <p>• Mantenha o telefone conectado à internet</p>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" onClick={onClose}>
             Cancelar
@@ -86,5 +84,5 @@ export function WhatsappConnectModal({
         </div>
       </div>
     </div>
-  )
+  );
 }

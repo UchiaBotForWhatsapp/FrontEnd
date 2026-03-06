@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -130,9 +131,9 @@ export function BotList() {
               className="bg-card border-border hover:border-accent/50 transition"
             >
               <CardHeader className="pb-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="size-12 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="size-10 sm:size-12 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border shrink-0">
                       {bot.avatar ? (
                         <img
                           src={bot.avatar}
@@ -140,24 +141,35 @@ export function BotList() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-sm font-semibold text-muted-foreground">
+                        <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
                           {getInitials(bot.name)}
                         </span>
                       )}
                     </div>
 
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-xl">{bot.name}</CardTitle>
-                        <Badge
-                          variant={bot.active ? "default" : "secondary"}
-                          className="bg-accent"
-                        >
-                          {bot.active ? "Ativo" : "Inativo"}
-                        </Badge>
-                        {bot.plan && <Badge variant="outline">{bot.plan}</Badge>}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <CardTitle className="text-lg sm:text-xl truncate">
+                          {bot.name}
+                        </CardTitle>
+                        <div className="flex gap-1.5">
+                          <Badge
+                            variant={bot.active ? "default" : "secondary"}
+                            className="bg-accent text-[10px] sm:text-xs"
+                          >
+                            {bot.active ? "Ativo" : "Inativo"}
+                          </Badge>
+                          {bot.plan && (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] sm:text-xs"
+                            >
+                              {bot.plan}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <CardDescription className="line-clamp-2">
+                      <CardDescription className="line-clamp-2 text-xs sm:text-sm">
                         {bot.description || "Sem descrição"}
                       </CardDescription>
                     </div>
@@ -168,11 +180,12 @@ export function BotList() {
                     type="button"
                     onClick={() => handleToggleBot(bot)}
                     variant={bot.active ? "outline" : "default"}
-                    className={
+                    className={cn(
+                      "w-full sm:w-auto h-9 sm:h-auto",
                       bot.active
                         ? "border-accent text-accent hover:bg-accent/10"
-                        : "bg-accent hover:bg-accent/90"
-                    }
+                        : "bg-accent hover:bg-accent/90",
+                    )}
                   >
                     <Power className="w-4 h-4" />
                     {bot.active ? "Desativar" : "Ativar"}

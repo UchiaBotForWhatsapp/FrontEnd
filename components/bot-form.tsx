@@ -45,9 +45,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
   const [error, setError] = useState("");
   const [formData, setFormData] = useState(() => createFormState(initialData));
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState(
-    initialData?.avatar || "",
-  );
+  const [avatarPreview, setAvatarPreview] = useState(initialData?.avatar || "");
   const avatarObjectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -197,7 +195,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
               </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="name" className="mb-2 block">
                   Nome do Bot
@@ -231,7 +229,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="channel" className="mb-2 block">
                   Canal
@@ -276,7 +274,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="phoneNumber" className="mb-2 block">
                   Numero do WhatsApp
