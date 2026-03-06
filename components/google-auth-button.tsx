@@ -21,6 +21,22 @@ export function GoogleAuthButton({
   const [buttonReady, setButtonReady] = useState(false);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
+  const [dynamicWidth, setDynamicWidth] = useState<number>(360);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (buttonRef.current?.parentElement) {
+        const containerWidth = buttonRef.current.parentElement.offsetWidth;
+        const validWidth = Math.min(Math.max(containerWidth, 200), 400);
+        setDynamicWidth(validWidth);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
   useEffect(() => {
     if (!clientId || !buttonRef.current || !scriptReady) return;
 
@@ -40,7 +56,7 @@ export function GoogleAuthButton({
       size,
       text,
       shape: "pill",
-      width: 360,
+      width: dynamicWidth,
     });
 
     let attempts = 0;
@@ -57,7 +73,7 @@ export function GoogleAuthButton({
     }, 50);
 
     return () => window.clearInterval(intervalId);
-  }, [clientId, onCredential, text, theme, size, scriptReady]);
+  }, [clientId, onCredential, text, theme, size, scriptReady, dynamicWidth]);
 
   return (
     <>
