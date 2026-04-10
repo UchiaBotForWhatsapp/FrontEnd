@@ -10,12 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
-import { GoogleAuthButton } from "./google-auth-button";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
-  const { login, googleLogin, loading, error } = useAuth();
+  const { login, loading, error } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [formError, setFormError] = useState("");
   const [showPassword, setShowPasword] = useState(false);
@@ -28,16 +27,6 @@ export function LoginForm() {
   function togglePassword() {
     setShowPasword((prev) => !prev);
   }
-
-  const handleGoogleLogin = async (credential: string) => {
-    setFormError("");
-    try {
-      const response = await googleLogin(credential);
-      router.push(response?.isNewUser ? "/plans" : "/dashboard");
-    } catch (err: any) {
-      setFormError(err.message);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,24 +49,9 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Login</CardTitle>
-        <CardDescription>Acesse sua conta Uchiha Bot</CardDescription>
+        <CardDescription>Acesse sua conta Kwanza Bot</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <GoogleAuthButton onCredential={handleGoogleLogin} text="signin_with" theme="outline" />
-        </div>
-
-        <div className="relative mb-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Ou continue com email
-            </span>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {(formError || error) && (
             <div className="p-3 bg-destructive/10 border border-destructive rounded-lg text-sm text-destructive">

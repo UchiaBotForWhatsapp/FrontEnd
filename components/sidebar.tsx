@@ -64,10 +64,10 @@ export function Sidebar() {
           >
             <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
               <span className="text-sidebar-primary-foreground font-bold text-sm">
-                UB
+                KB
               </span>
             </div>
-            <h1 className="font-bold text-lg">U Bot</h1>
+            <h1 className="font-bold text-lg">Kwanza Bot</h1>
           </Link>
 
           {/* Botão fechar só aparece em mobile */}

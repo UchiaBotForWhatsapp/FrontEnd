@@ -172,7 +172,7 @@ export function ProductModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px] overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-[500px] overflow-y-auto max-h-[90vh] modal-scrollbar">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Cadastrar Produto

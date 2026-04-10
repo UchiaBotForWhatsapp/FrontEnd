@@ -36,7 +36,7 @@ export function TermsModal({ open, onOpenChange, onAccept }: TermsModalProps) {
         </DialogHeader>
 
         <div className="flex-1 min-h-0 overflow-hidden bg-background">
-          <ScrollArea className="h-full w-full">
+          <ScrollArea className="h-full w-full modal-scrollbar">
             <div className="px-3 sm:px-6 py-4 space-y-4 text-xs sm:text-sm">
               <section>
                 <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2">

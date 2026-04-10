@@ -32,8 +32,8 @@ export async function apiCall<T>(
   const defaultHeaders: Record<string, string> = isFormData
     ? {}
     : {
-        "Content-Type": "application/json",
-      };
+      "Content-Type": "application/json",
+    };
   if (auth) defaultHeaders["Authorization"] = `Bearer ${auth}`;
   const response = await fetch(url, {
     headers: {
@@ -59,10 +59,17 @@ export async function apiCall<T>(
   }
 
   if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Unknown error" }));
-    throw new Error(error.message || `API error: ${response.status}`);
+    const errorText = await response.text();
+    console.error(`API Error [${response.status}]: ${url}`, errorText);
+
+    let errorMessage = "Erro na comunicação com o servidor";
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.message || errorMessage;
+    } catch {
+      // For non-JSON, we use the generic message but log the status
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -192,6 +199,13 @@ export const botApi = {
     apiCall(`/bots/${id}`, {
       method: "PATCH",
     }),
+
+  start: (id: string) =>
+    apiCall(`/bots/${id}/start`, {
+      method: "POST",
+    }),
+
+  getQrCode: (id: string) => apiCall<any>(`/bots/${id}/qr`),
 };
 
 export const planApi = {

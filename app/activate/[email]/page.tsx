@@ -6,9 +6,9 @@ export default function ActivatePage() {
       <div className="w-full flex flex-col items-center gap-8">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-            <span className="text-accent-foreground font-bold">UB</span>
+            <span className="text-accent-foreground font-bold">KB</span>
           </div>
-          <h1 className="text-2xl font-bold">U Bot</h1>
+          <h1 className="text-2xl font-bold">Kwanza Bot</h1>
         </div>
         <ActivationForm />
       </div>
