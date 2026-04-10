@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { botApi } from "@/lib/api-client";
 import { toast } from "sonner";
+import { getWhatsAppSocket } from "@/lib/whatsapp-socket";
 
 interface BotQrModalProps {
   botId: string;
@@ -43,6 +44,17 @@ export function BotQrModal({
 
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isFetchingRef = useRef(false);
+  const completedRef = useRef(false);
+  const statusRef = useRef<ConnectionStatus>("idle");
+  const qrCodeRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+
+  useEffect(() => {
+    qrCodeRef.current = qrCode;
+  }, [qrCode]);
 
   const fetchQrCode = useCallback(
     async (isAuto = false) => {
@@ -54,50 +66,82 @@ export function BotQrModal({
 
       try {
         const response = await botApi.getQrCode(botId);
+        const activeByMessage =
+          typeof response.message === "string" &&
+          response.message.toLowerCase().includes("conect");
 
-        if (response.active) {
+        if (response.active || activeByMessage) {
           setStatus("active");
           setQrCode(null);
           setMessage(response.message || "Bot já está conectado");
           stopPolling();
-          if (onSuccess) onSuccess();
+          if (!completedRef.current && onSuccess) {
+            completedRef.current = true;
+            onSuccess();
+          }
+          completeAndClose();
         } else if (response.qr) {
           setQrCode(response.qr);
           setStatus("waiting");
           setMessage(response.message || "QR code gerado");
+        } else if (isAuto || statusRef.current === "waiting") {
+          setStatus("waiting");
+          setError(null);
+          setMessage("Aguardando confirmação do WhatsApp...");
         } else {
           setStatus("error");
           setError("Não foi possível gerar o QR Code.");
         }
       } catch (err: any) {
-        toast.error("Erro ao buscar QR Code");
-        setStatus("error");
-        setError(
-          "Ocorreu um erro ao carregar o QR Code. Por favor, tente novamente.",
-        );
+        console.error("Erro ao buscar QR Code", err);
+        if (isAuto && (statusRef.current === "waiting" || qrCodeRef.current)) {
+          setStatus("waiting");
+          setError(null);
+          setMessage("Aguardando confirmação do WhatsApp...");
+        } else if (isAuto) {
+          setStatus("waiting");
+          setError(null);
+          setMessage("Tentando gerar o QR Code novamente...");
+        } else {
+          toast.error("Erro ao buscar QR Code");
+          setStatus("error");
+          setError(
+            "Ocorreu um erro ao carregar o QR Code. Por favor, tente novamente.",
+          );
+        }
       } finally {
         isFetchingRef.current = false;
       }
     },
-    [botId],
+    [botId, onSuccess],
   );
+
+  const stopPolling = useCallback(() => {
+    if (pollingTimerRef.current) {
+      clearInterval(pollingTimerRef.current);
+      pollingTimerRef.current = null;
+    }
+  }, []);
 
   const startPolling = useCallback(() => {
     stopPolling();
     pollingTimerRef.current = setInterval(() => {
       fetchQrCode(true);
-    }, 20000);
-  }, [fetchQrCode]);
+    }, 5000);
+  }, [fetchQrCode, stopPolling]);
 
-  const stopPolling = () => {
-    if (pollingTimerRef.current) {
-      clearInterval(pollingTimerRef.current);
-      pollingTimerRef.current = null;
+  const completeAndClose = useCallback(() => {
+    if (!completedRef.current) {
+      completedRef.current = true;
+      if (onSuccess) onSuccess();
     }
-  };
+    stopPolling();
+    onClose();
+  }, [onClose, onSuccess, stopPolling]);
 
   useEffect(() => {
     if (open && botId) {
+      completedRef.current = false;
       fetchQrCode();
       startPolling();
     } else {
@@ -111,7 +155,57 @@ export function BotQrModal({
     }
 
     return () => stopPolling();
-  }, [open, botId, fetchQrCode, startPolling]);
+  }, [open, botId, fetchQrCode, startPolling, stopPolling]);
+
+  useEffect(() => {
+    if (!open || !botId) return;
+
+    const socket = getWhatsAppSocket();
+    const eventName = `bot:${botId}:qr`;
+    const handleQr = (payload: { qr?: string; message?: string }) => {
+      if (payload?.qr) {
+        setQrCode(payload.qr);
+        setStatus("waiting");
+        setMessage(payload.message || "QR code gerado");
+        setError(null);
+      }
+    };
+
+    const handleStatus = (payload: {
+      botId?: string;
+      active?: boolean;
+      status?: string;
+      message?: string;
+    }) => {
+      console.log("Received bot:status", payload);
+      if (payload?.botId !== botId) {
+        console.log("botId mismatch", payload.botId, botId);
+        return;
+      }
+
+      const shouldClose =
+        payload.active === true ||
+        payload.status === "online" ||
+        (typeof payload.message === "string" &&
+          payload.message.toLowerCase().includes("conect"));
+
+      if (shouldClose) {
+        console.log("Bot is ready, closing modal", payload);
+        setStatus("active");
+        setMessage(payload.message || "Bot conectado");
+        setError(null);
+        completeAndClose();
+      }
+    };
+
+    socket.on(eventName, handleQr);
+    socket.on("bot:status", handleStatus);
+
+    return () => {
+      socket.off(eventName, handleQr);
+      socket.off("bot:status", handleStatus);
+    };
+  }, [botId, open, completeAndClose]);
 
   if (!open) return null;
 
@@ -133,7 +227,13 @@ export function BotQrModal({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (status === "active") {
+                completeAndClose();
+                return;
+              }
+              onClose();
+            }}
             className="absolute top-4 sm:top-6 right-4 sm:right-6 p-1.5 sm:p-2 rounded-full hover:bg-secondary text-muted-foreground transition-colors"
           >
             <X className="size-4 sm:size-5" />
@@ -183,7 +283,7 @@ export function BotQrModal({
                 </div>
                 <Button
                   className="bg-accent hover:bg-accent/90 w-full h-8 text-xs sm:h-10 sm:text-sm"
-                  onClick={onClose}
+                  onClick={completeAndClose}
                 >
                   Concluir
                 </Button>
@@ -232,7 +332,7 @@ export function BotQrModal({
 
               <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground justify-center text-center">
                 <Scan className="size-3 flex-none" />
-                <span>Atualização automática a cada 20s.</span>
+                <span>Atualização automática a cada 5s.</span>
               </div>
             </div>
           )}

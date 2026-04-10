@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,11 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { useBots } from "@/hooks/use-bots";
 import { Trash2, Edit2, Plus, Power } from "lucide-react";
+import { getWhatsAppSocket } from "@/lib/whatsapp-socket";
 import { Modal } from "./modal";
 import { toast } from "sonner";
 import { LoadingButton } from "./loading-button";
 import { BotQrModal } from "./bot-qr-modal";
-import { WhatsappConnectModal } from "./whatsapp-connect-modal";
 
 export function BotList() {
   const { bots, isLoading, deleteBot, toggleBot, mutate } = useBots();
@@ -28,10 +28,10 @@ export function BotList() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [activeBotId, setActiveBotId] = useState<string | null>(null);
-  const [qrCode, setQrCode] = useState<string | null>(null);
-  const [qrStatus, setQrStatus] = useState<"waiting" | "connected" | "error">(
-    "waiting",
-  );
+  const [statusMap, setStatusMap] = useState<Record<
+    string,
+    { active?: boolean; status?: string }
+  >>({});
 
   const OpenDeleteBot = (bot: any) => {
     setBotToDelete(bot);
@@ -59,6 +59,8 @@ export function BotList() {
     if (!bot.active) {
       setActiveBotId(bot._id);
       setQrModalOpen(true);
+      setTogglingId(bot._id);
+      // Removido: await startBot(bot._id);
       return;
     }
 
@@ -73,6 +75,34 @@ export function BotList() {
       setTogglingId(null);
     }
   };
+
+  useEffect(() => {
+    const socket = getWhatsAppSocket();
+
+    const handleStatusEvent = (payload: {
+      botId?: string;
+      active?: boolean;
+      status?: string;
+    }) => {
+      if (!payload?.botId) return;
+
+      setStatusMap((prev) => ({
+        ...prev,
+        [payload.botId]: {
+          active: payload.active ?? prev[payload.botId]?.active,
+          status: payload.status ?? prev[payload.botId]?.status,
+        },
+      }));
+
+      mutate();
+    };
+
+    socket.on("bot:status", handleStatusEvent);
+
+    return () => {
+      socket.off("bot:status", handleStatusEvent);
+    };
+  }, [mutate]);
 
   const getInitials = (name?: string) => {
     if (!name) return "B";
@@ -91,22 +121,12 @@ export function BotList() {
           onClose={() => {
             setQrModalOpen(false);
             setActiveBotId(null);
+            setTogglingId(null);
           }}
           onSuccess={() => {
+            setTogglingId(null);
             mutate();
           }}
-        />
-      )}
-
-      {/* Keeping old modal just in case, but it's now inactive */}
-      {qrCode && !activeBotId && (
-        <WhatsappConnectModal
-          open={qrModalOpen}
-          loading={togglingId !== null}
-          qrCode={qrCode}
-          status={qrStatus}
-          onClose={() => setQrModalOpen(false)}
-          onConfirm={() => setQrModalOpen(false)}
         />
       )}
 
@@ -140,16 +160,19 @@ export function BotList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {bots.map((bot: any) => (
-            <Card
-              key={bot._id}
-              className="bg-card border-border hover:border-accent/50 transition"
-            >
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+          {bots.map((bot: any) => {
+            const isActive = statusMap[bot._id]?.active ?? bot.active;
+
+            return (
+              <Card
+                key={bot._id}
+                className="bg-card border-border hover:border-accent/50 transition"
+              >
               <CardHeader className="pb-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="size-12 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex items-start gap-4 min-w-0">
+                    <div className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
                       {bot.avatar ? (
                         <img
                           src={bot.avatar}
@@ -163,39 +186,49 @@ export function BotList() {
                       )}
                     </div>
 
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <CardTitle className="text-xl">{bot.name}</CardTitle>
                         <Badge
-                          variant={bot.active ? "default" : "secondary"}
+                          variant={isActive ? "default" : "secondary"}
                           className="bg-accent"
                         >
-                          {bot.active ? "Ativo" : "Inativo"}
+                          {isActive ? "Ativo" : "Inativo"}
                         </Badge>
                         {bot.plan && (
                           <Badge variant="outline">{bot.plan}</Badge>
                         )}
                       </div>
-                      <CardDescription className="line-clamp-2">
+                      <CardDescription
+                        className="line-clamp-2"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
                         {bot.description || "Sem descrição"}
                       </CardDescription>
                     </div>
                   </div>
 
-                  <LoadingButton
-                    loading={togglingId === bot._id}
-                    type="button"
-                    onClick={() => handleToggleBot(bot)}
-                    variant={bot.active ? "outline" : "default"}
-                    className={
-                      bot.active
-                        ? "border-accent text-accent hover:bg-accent/10"
-                        : "bg-accent hover:bg-accent/90"
-                    }
-                  >
-                    <Power className="w-4 h-4" />
-                    {bot.active ? "Desativar" : "Ativar"}
-                  </LoadingButton>
+                  <div className="flex-shrink-0 self-start">
+                    <LoadingButton
+                      loading={togglingId === bot._id}
+                      type="button"
+                      onClick={() => handleToggleBot(bot)}
+                      variant={isActive ? "outline" : "default"}
+                      className={
+                        isActive
+                          ? "border-accent text-accent hover:bg-accent/10"
+                          : "bg-accent hover:bg-accent/90"
+                      }
+                    >
+                      <Power className="w-4 h-4" />
+                      {isActive ? "Desativar" : "Ativar"}
+                    </LoadingButton>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -228,8 +261,9 @@ export function BotList() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
 

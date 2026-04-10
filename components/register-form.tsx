@@ -23,13 +23,12 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { TermsModal } from "./terms-modal";
-import { GoogleAuthButton } from "./google-auth-button";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { COUNTRIES_WITH_DDI, getDDIByCountry } from "@/lib/country-data";
 
 export function RegisterForm() {
   const router = useRouter();
-  const { register, googleLogin, loading, error } = useAuth();
+  const { register, loading, error } = useAuth();
 
   const [cities, setCities] = useState<string[]>([]);
   const [allCities, setAllCities] = useState<
@@ -109,25 +108,6 @@ export function RegisterForm() {
     const ddi = getDDIByCountry(formData.country);
     setFormData((prev) => ({ ...prev, ddi }));
   }, [formData.country, allCities]);
-
-  /* =====================
-     Handle Google Sign-Up
-  ===================== */
-    const handleGoogleSignUp = async (credential: string) => {
-    setFormError("");
-
-    if (!formData.termsAccepted) {
-      setFormError("Você deve aceitar os Termos e Condições para continuar");
-      return;
-    }
-
-    try {
-      const response = await googleLogin(credential);
-      router.push(response?.isNewUser ? "/plans" : "/dashboard");
-    } catch (err: any) {
-      setFormError(err.message);
-    }
-  };
 
   /* =====================
      Handle Terms Acceptance
@@ -219,21 +199,6 @@ export function RegisterForm() {
         </CardHeader>
 
         <CardContent>
-          <div className="mb-4">
-            <GoogleAuthButton onCredential={handleGoogleSignUp} text="signup_with" theme="outline" />
-          </div>
-
-          <div className="relative mb-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Ou continue com email
-              </span>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {(formError || error) && (
               <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">

@@ -61,6 +61,17 @@ export function useBots() {
     return updated
   }
 
+  const startBot = async (id: string) => {
+    const response = await botApi.start(id)
+    const updated = extractBotItem(response)
+    mutate(
+      (prev: any) =>
+        extractBotsList(prev).map((bot: any) => (bot._id === id ? updated : bot)),
+      false,
+    )
+    return updated
+  }
+
 
   return {
     bots,
@@ -68,7 +79,8 @@ export function useBots() {
     error,
     createBot,
     updateBot,
-    deleteBot,
-    toggleBot,
+   deleteBot,
+   toggleBot,
+    startBot,
   }
 }
