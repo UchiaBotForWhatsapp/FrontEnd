@@ -87,7 +87,12 @@ export function RegisterForm() {
   };
 
   const handleGoogleRegistration = async (idToken: string) => {
-    const response = await googleLogin(idToken, "register", formData.termsAccepted);
+    if (!formData.termsAccepted) {
+      toast.error("Aceita os termos");
+      return;
+    }
+
+    const response = await googleLogin(idToken, "register", true);
     toast.success("Conta criada com sucesso. Bem-vindo!");
     router.push(response.isNewUser ? "/plans" : "/dashboard");
   };
