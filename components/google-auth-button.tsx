@@ -176,7 +176,9 @@ export function GoogleAuthButton({
               />
             </svg>
           )}
-          {!loading && (mode === "register" ? "Criar conta com Google" : "Entrar com Google")}
+          {!loading && (
+            mode === "register" ? "Criar conta com Google" : "Entrar com Google"
+          )}
         </Button>
         <div
           ref={containerRef}

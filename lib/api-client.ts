@@ -174,13 +174,23 @@ export const authApi = {
     return res?.user ?? res;
   },
 
-  updateMe: async (name: string, email: string) => {
+  updateMe: async (data: {
+    name: string;
+    email: string;
+    gender: "male" | "female" | "other";
+  }) => {
     const res: any = await apiCall("/auth/me", {
       method: "PUT",
-      body: JSON.stringify({ name, email }),
+      body: JSON.stringify(data),
     });
     return res?.user ?? res;
   },
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiCall<{ message: string }>("/auth/me/password", {
+      method: "PUT",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }),
 
   updatePlan: (plan: string) =>
     apiCall("/auth/me/plan", {
