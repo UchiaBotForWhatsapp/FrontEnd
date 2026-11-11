@@ -200,7 +200,7 @@ export default function SettingsPage() {
     <div className="flex h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="p-8 max-w-3xl mx-auto space-y-6">
+        <div className="p-4 pt-16 md:p-8 max-w-3xl mx-auto space-y-6">
           <h1 className="text-3xl font-bold">Configurações</h1>
 
           <Card>

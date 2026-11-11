@@ -6,7 +6,7 @@ export default function DashboardPage() {
     <div className="flex h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="p-8 max-w-7xl mx-auto">
+        <div className="p-4 pt-16 md:p-8 max-w-7xl mx-auto">
           <BotList />
         </div>
       </main>

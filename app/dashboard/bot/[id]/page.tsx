@@ -58,11 +58,10 @@ export default function EditBotPage({ params }: BotPageProps) {
     <div className="flex h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="p-8 max-w-3xl mx-auto">
+        <div className="p-4 pt-16 md:p-8 max-w-3xl mx-auto">
           <BotForm botId={id} initialData={botData} />
         </div>
       </main>
     </div>
   )
 }
-

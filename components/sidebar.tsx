@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { authApi } from "@/lib/api-client";
 import {
   MessageCircle,
   Settings,
@@ -19,6 +20,25 @@ export function Sidebar() {
   const router = useRouter();
   const { logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    authApi.getMe()
+      .then((user) => {
+        if (active && typeof user?.name === "string") {
+          setUserName(user.name.trim());
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load sidebar user:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const navItems = [
     { href: "/dashboard", label: "Meus Bots", icon: MessageCircle },
@@ -34,12 +54,17 @@ export function Sidebar() {
   return (
     <>
       {/* Botão hamburger para telas pequenas */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-sidebar-primary text-sidebar-primary-foreground rounded-md"
-        onClick={() => setOpen(true)}
-      >
-        <Menu className="w-6 h-6" />
-      </button>
+      {!open && (
+        <button
+          type="button"
+          aria-label="Abrir menu"
+          aria-expanded={open}
+          className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-sidebar-primary text-sidebar-primary-foreground rounded-md"
+          onClick={() => setOpen(true)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Overlay */}
       {open && (
@@ -60,14 +85,19 @@ export function Sidebar() {
         <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 hover:opacity-80 transition"
+            className="flex items-center gap-3 hover:opacity-80 transition"
           >
-            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-              <span className="text-sidebar-primary-foreground font-bold text-sm">
-                S
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sidebar-primary">
+              <span className="text-sidebar-primary-foreground font-bold text-lg">
+                {userName.charAt(0).toUpperCase() || "U"}
               </span>
             </div>
-            <h1 className="font-bold text-lg">Sefia</h1>
+            <span className="min-w-0">
+              <span className="block text-xs text-sidebar-foreground/70">Olá,</span>
+              <span className="block truncate font-bold text-sm">
+                {userName.split(/\s+/)[0] || "Usuário"}
+              </span>
+            </span>
           </Link>
 
           {/* Botão fechar só aparece em mobile */}
