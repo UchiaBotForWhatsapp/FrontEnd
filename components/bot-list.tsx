@@ -252,11 +252,19 @@ export function BotList() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between ">
-                  <div className="text-sm text-muted-foreground cursor-pointer">
-                    <span className="font-medium text-foreground">
-                      {bot.messages_count || 0}
-                    </span>{" "}
-                    mensagens
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>
+                      <span className="font-medium text-foreground">
+                        {bot.messages_count || 0}
+                      </span>{" "}
+                      mensagens
+                    </span>
+                    <span>
+                      <span className="font-medium text-foreground">
+                        {Array.isArray(bot.products) ? bot.products.length : 0}
+                      </span>{" "}
+                      produtos
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/dashboard/bot/${bot._id}`}>
