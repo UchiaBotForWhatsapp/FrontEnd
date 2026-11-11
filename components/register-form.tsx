@@ -25,12 +25,13 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { TermsModal } from "./terms-modal";
+import { GoogleAuthButton } from "./google-auth-button";
 
 type Gender = "male" | "female" | "other";
 
 export function RegisterForm() {
   const router = useRouter();
-  const { register, loading, error } = useAuth();
+  const { register, googleLogin, loading, error } = useAuth();
   const [formError, setFormError] = useState("");
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -84,6 +85,11 @@ export function RegisterForm() {
           : "Não foi possível criar sua conta",
       );
     }
+  };
+
+  const handleGoogleRegistration = async (idToken: string) => {
+    const response = await googleLogin(idToken, "register", formData.termsAccepted);
+    router.push(response.isNewUser ? "/plans" : "/dashboard");
   };
 
   return (
@@ -229,6 +235,11 @@ export function RegisterForm() {
               <LogIn />
               {loading ? "Criando conta..." : "Criar Conta"}
             </LoadingButton>
+            <GoogleAuthButton
+              onCredential={handleGoogleRegistration}
+              requiresTermsAcceptance={!formData.termsAccepted}
+              mode="register"
+            />
 
             <div className="text-center text-sm">
               Já tem conta?{" "}

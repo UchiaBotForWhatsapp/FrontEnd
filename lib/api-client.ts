@@ -98,16 +98,27 @@ export const authApi = {
       return res;
     })(identifier, password),
 
-  googleLogin: (idToken: string) =>
-    (async (idToken: string) => {
+  googleLogin: (
+    idToken: string,
+    intent: "login" | "register",
+    termsAccepted = false,
+  ) =>
+    (async (
+      idToken: string,
+      intent: "login" | "register",
+      termsAccepted: boolean,
+    ) => {
       const res: any = await apiCall("/auth/google", {
         method: "POST",
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({ idToken, intent, termsAccepted }),
       });
       const token = extractTokenFromResponse(res);
-      if (token) setAuthToken(token);
+      if (!token) {
+        throw new Error("O servidor não retornou um token de autenticação.");
+      }
+      setAuthToken(token);
       return res;
-    })(idToken),
+    })(idToken, intent, termsAccepted),
   register: (data: {
     name: string;
     email: string;

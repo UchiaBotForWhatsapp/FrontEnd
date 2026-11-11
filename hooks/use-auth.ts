@@ -52,11 +52,15 @@ export function useAuth() {
     clearAuthToken();
   }, []);
 
-  const googleLogin = useCallback(async (idToken: string) => {
+  const googleLogin = useCallback(async (
+    idToken: string,
+    intent: "login" | "register",
+    termsAccepted = false,
+  ) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authApi.googleLogin(idToken);
+      const response = await authApi.googleLogin(idToken, intent, termsAccepted);
       setUser(response.user);
       return response;
     } catch (err: any) {

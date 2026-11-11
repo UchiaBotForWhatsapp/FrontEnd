@@ -11,10 +11,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import { GoogleAuthButton } from "./google-auth-button";
 
 export function LoginForm() {
   const router = useRouter();
-  const { login, loading, error } = useAuth();
+  const { login, googleLogin, loading, error } = useAuth();
   const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [formError, setFormError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -43,6 +44,11 @@ export function LoginForm() {
     } catch (err: any) {
       setFormError(err.message);
     }
+  };
+
+  const handleGoogleLogin = async (idToken: string) => {
+    const response = await googleLogin(idToken, "login");
+    router.push(response.isNewUser ? "/plans" : "/dashboard");
   };
 
   return (
@@ -106,6 +112,7 @@ export function LoginForm() {
             <LogIn />
             {loading ? "Entrando..." : "Entrar"}
           </LoadingButton>
+          <GoogleAuthButton onCredential={handleGoogleLogin} mode="login" />
           <div className="text-center text-sm">
             <Link href="/forgot-password" className="text-accent hover:underline">
               Esqueci a senha
