@@ -243,6 +243,11 @@ export const botApi = {
       method: "DELETE",
     }),
 
+  toggle: (id: string) =>
+    apiCall(`/bots/${id}/status`, {
+      method: "PATCH",
+    }),
+
 };
 
 export const planApi = {

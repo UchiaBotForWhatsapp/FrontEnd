@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useBots } from "@/hooks/use-bots";
-import { Bot as BotIcon, Trash2, Edit2, Plus } from "lucide-react";
+import { Bot as BotIcon, Trash2, Edit2, Plus, Power } from "lucide-react";
 import { Modal } from "./modal";
 import { toast } from "sonner";
 import {
@@ -27,6 +27,7 @@ import {
 interface BotItem {
   _id: string;
   name: string;
+  active?: boolean;
   description?: string;
   plan?: string;
   messages_count?: number;
@@ -35,10 +36,11 @@ interface BotItem {
 
 export function BotList() {
   const router = useRouter();
-  const { bots, isLoading, deleteBot } = useBots();
+  const { bots, isLoading, deleteBot, toggleBot } = useBots();
   const [botToDelete, setBotToDelete] = useState<BotItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [botLimitDialogOpen, setBotLimitDialogOpen] = useState(false);
+  const [togglingBotId, setTogglingBotId] = useState<string | null>(null);
 
   const OpenDeleteBot = (bot: BotItem) => {
     setBotToDelete(bot);
@@ -56,6 +58,19 @@ export function BotList() {
     } catch (error) {
       console.error("Erro ao deletar bot", error);
       toast.error("Ocorreu um erro ao excluir o bot.");
+    }
+  };
+
+  const handleToggleBot = async (bot: BotItem) => {
+    setTogglingBotId(bot._id);
+    try {
+      const updatedBot = await toggleBot(bot._id);
+      toast.success(updatedBot.active ? "Bot ativado" : "Bot desativado");
+    } catch (error) {
+      console.error("Erro ao alterar estado do bot", error);
+      toast.error("Não foi possível alterar o estado do bot.");
+    } finally {
+      setTogglingBotId(null);
     }
   };
 
@@ -162,6 +177,20 @@ export function BotList() {
                     </span>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant={bot.active ? "outline" : "default"}
+                      onClick={() => handleToggleBot(bot)}
+                      disabled={togglingBotId === bot._id}
+                      className="gap-2"
+                    >
+                      {togglingBotId === bot._id ? (
+                        <Spinner className="size-4" />
+                      ) : (
+                        <Power className="size-4" />
+                      )}
+                      {bot.active ? "Desativar" : "Ativar"}
+                    </Button>
                     <Link href={`/dashboard/bot/${bot._id}`}>
                       <Button
                         size="sm"
