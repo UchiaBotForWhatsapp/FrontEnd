@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import type React from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,168 +25,64 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { TermsModal } from "./terms-modal";
-import { Eye, EyeOff, LogIn } from "lucide-react";
-import { COUNTRIES_WITH_DDI, getDDIByCountry } from "@/lib/country-data";
+
+type Gender = "male" | "female" | "other";
 
 export function RegisterForm() {
   const router = useRouter();
   const { register, loading, error } = useAuth();
-
-  const [cities, setCities] = useState<string[]>([]);
-  const [allCities, setAllCities] = useState<
-    { country: string; cities: string[] }[]
-  >([]);
   const [formError, setFormError] = useState("");
   const [termsModalOpen, setTermsModalOpen] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    country: "",
-    city: "",
-    gender: "",
+    gender: "" as Gender | "",
     password: "",
-    confirmPassword: "",
     termsAccepted: false,
-    ddi: "",
   });
 
-  const [showPassword, setSwowPasword] = useState(false);
-  const [showConfirmPassword, setShowComfirmPassword] = useState(false);
-
-  function togglePassword() {
-    setSwowPasword((prev) => !prev);
-  }
-
-  function toggleConfimPassword() {
-    setShowComfirmPassword((prev) => !prev);
-  }
-
-  /* =====================
-     Input handler
-  ===================== */
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  /* =====================
-     Fetch cities data
-  ===================== */
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const res = await fetch(
-          "https://countriesnow.space/api/v0.1/countries",
-        );
-        const data = await res.json();
-        setAllCities(data.data);
-      } catch (err) {
-        console.error("Erro ao carregar cidades", err);
-      }
-    };
-
-    fetchCities();
-  }, []);
-
-  /* =====================
-     Filter cities by country & auto-fill DDI
-  ===================== */
-  useEffect(() => {
-    if (!formData.country) {
-      setCities([]);
-      setFormData((prev) => ({ ...prev, ddi: "" }));
-      return;
-    }
-
-    // Get cities for selected country
-    const selectedCountry = allCities.find(
-      (c) => c.country === formData.country,
-    );
-    setCities(selectedCountry?.cities || []);
-
-    // Auto-fill DDI
-    const ddi = getDDIByCountry(formData.country);
-    setFormData((prev) => ({ ...prev, ddi }));
-  }, [formData.country, allCities]);
-
-  /* =====================
-     Handle Terms Acceptance
-  ===================== */
-  const handleTermsAccept = () => {
-    setFormData((prev) => ({ ...prev, termsAccepted: true }));
-  };
-
-  /* =====================
-     Submit
-  ===================== */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setFormError("");
 
-    const {
-      name,
-      email,
-      phone,
-      country,
-      city,
-      gender,
-      password,
-      confirmPassword,
-      termsAccepted,
-      ddi,
-    } = formData;
-
-    // Validação básica
-    if (
-      !name ||
-      !email ||
-      !phone ||
-      !country ||
-      !city ||
-      !password ||
-      !confirmPassword
-    ) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.gender || !formData.password) {
       setFormError("Por favor, preencha todos os campos");
       return;
     }
 
-    if (!termsAccepted) {
-      setFormError("Você deve aceitar os Termos e Condições para continuar");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setFormError("As senhas não correspondem");
-      return;
-    }
-
-    if (password.length < 8) {
+    if (formData.password.length < 8) {
       setFormError("A senha deve ter pelo menos 8 caracteres");
       return;
     }
 
+    if (!formData.termsAccepted) {
+      setFormError("Você deve aceitar os Termos e Condições para continuar");
+      return;
+    }
+
+    const email = formData.email.trim().toLowerCase();
+
     try {
-      // Concatenate DDI + phone
-      const fullPhone = ddi + phone;
-
-      // Call register with all required fields
-      await register(
-        name,
+      await register({
+        name: formData.name,
         email,
-        fullPhone,
-        country,
-        city,
-        gender || "other",
-        termsAccepted,
-        password,
+        gender: formData.gender,
+        password: formData.password,
+        termsAccepted: formData.termsAccepted,
+      });
+      router.push(`/activate/${encodeURIComponent(email)}`);
+    } catch (submitError) {
+      setFormError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Não foi possível criar sua conta",
       );
-
-      // Redirect to activation
-      router.push(`/activate/${email}`);
-    } catch (err: any) {
-      setFormError(err.message);
     }
   };
 
@@ -206,158 +104,117 @@ export function RegisterForm() {
               </div>
             )}
 
-            <Input
-              name="name"
-              placeholder="Nome completo"
-              value={formData.name}
-              onChange={handleInputChange}
-              disabled={loading}
-            />
-
-            <Input
-              name="email"
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange}
-              disabled={loading}
-            />
-
-            {/* País */}
-            <Select
-              value={formData.country}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, country: value, city: "" }))
-              }
-              disabled={loading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o país" />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTRIES_WITH_DDI.map((country) => (
-                  <SelectItem key={country.code} value={country.name}>
-                    {country.flag} {country.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Cidade */}
-            <Select
-              value={formData.city}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, city: value }))
-              }
-              disabled={!formData.country || loading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione a cidade" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city} value={city}>
-                    {city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Gênero */}
-            <Select
-              value={formData.gender}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, gender: value }))
-              }
-              disabled={loading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Gênero (opcional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Masculino</SelectItem>
-                <SelectItem value="female">Feminino</SelectItem>
-                <SelectItem value="other">Outro</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Telefone com DDI */}
-            <div className="relative">
-              {formData.ddi && (
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  {formData.ddi}
-                </span>
-              )}
+            <div>
+              <label htmlFor="name" className="mb-2 block text-sm font-medium">
+                Nome
+              </label>
               <Input
-                name="phone"
-                placeholder={formData.ddi ? "900000000" : "Telefone"}
-                value={formData.phone}
+                id="name"
+                name="name"
+                autoComplete="name"
+                placeholder="Seu nome"
+                value={formData.name}
                 onChange={handleInputChange}
                 disabled={loading}
-                className={formData.ddi ? "pl-16" : ""}
+                required
               />
             </div>
-            <div className="relative">
+
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium">
+                Email
+              </label>
               <Input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Senha"
-                value={formData.password}
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="seu@email.com"
+                value={formData.email}
                 onChange={handleInputChange}
                 disabled={loading}
-                className="pr-10"
+                required
               />
-              <button
-                type="button"
-                onClick={togglePassword}
-                aria-label={showPassword ? "ocultar senha" : "mostrar senha"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500  cursor-pointer  border-none p-0 bg-transparent"
+            </div>
+
+            <div>
+              <label htmlFor="gender" className="mb-2 block text-sm font-medium">
+                Gênero
+              </label>
+              <Select
+                value={formData.gender}
+                onValueChange={(gender) => {
+                  if (gender === "male" || gender === "female" || gender === "other") {
+                    setFormData((previous) => ({ ...previous, gender }));
+                  }
+                }}
+                disabled={loading}
               >
-                {showPassword ? <EyeOff className="w-5 h-5 " /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            <div className="relative">
-              <Input
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirmar senha"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                disabled={loading}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={toggleConfimPassword}
-                aria-label={showConfirmPassword ? "ocultar senha" : "Mostrar senha"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500  cursor-pointer border-none p-0 bg-transparent"
-              >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+                <SelectTrigger id="gender" className="w-full" aria-label="Gênero">
+                  <SelectValue placeholder="Selecione seu gênero" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Masculino</SelectItem>
+                  <SelectItem value="female">Feminino</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Terms & Conditions */}
+            <div>
+              <label htmlFor="password" className="mb-2 block text-sm font-medium">
+                Senha
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Pelo menos 8 caracteres"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  minLength={8}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((previous) => !previous)}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-start space-x-2">
               <Checkbox
                 id="terms"
                 checked={formData.termsAccepted}
                 onCheckedChange={(checked) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    termsAccepted: checked as boolean,
+                  setFormData((previous) => ({
+                    ...previous,
+                    termsAccepted: checked === true,
                   }))
                 }
                 disabled={loading}
               />
               <label
                 htmlFor="terms"
-                className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm leading-5 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Eu aceito os{" "}
                 <button
                   type="button"
                   onClick={() => setTermsModalOpen(true)}
-                  className="text-accent hover:underline font-medium"
+                  className="font-medium text-accent hover:underline"
                 >
                   Termos e Condições
                 </button>
@@ -367,7 +224,7 @@ export function RegisterForm() {
             <LoadingButton
               loading={loading}
               type="submit"
-              className="w-full bg-accent hover:bg-accent/90 cursor-pointer"
+              className="w-full cursor-pointer bg-accent hover:bg-accent/90"
             >
               <LogIn />
               {loading ? "Criando conta..." : "Criar Conta"}
@@ -383,13 +240,13 @@ export function RegisterForm() {
         </CardContent>
       </Card>
 
-      {/* Terms Modal */}
       <TermsModal
         open={termsModalOpen}
         onOpenChange={setTermsModalOpen}
-        onAccept={handleTermsAccept}
+        onAccept={() =>
+          setFormData((previous) => ({ ...previous, termsAccepted: true }))
+        }
       />
     </>
   );
 }
-

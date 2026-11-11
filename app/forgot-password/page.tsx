@@ -1,0 +1,17 @@
+import { ForgotPasswordForm } from "@/components/forgot-password-form";
+
+export default function ForgotPasswordPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-card px-4">
+      <div className="flex w-full flex-col items-center gap-8">
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+            <span className="font-bold text-accent-foreground">KB</span>
+          </div>
+          <h1 className="text-2xl font-bold">Kwanza Bot</h1>
+        </div>
+        <ForgotPasswordForm />
+      </div>
+    </main>
+  );
+}

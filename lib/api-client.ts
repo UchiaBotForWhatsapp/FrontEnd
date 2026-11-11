@@ -87,16 +87,16 @@ function extractTokenFromResponse(res: any): string | null {
 }
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    (async (email: string, password: string) => {
+  login: (identifier: string, password: string) =>
+    (async (identifier: string, password: string) => {
       const res: any = await apiCall("/auth/sign-in", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       });
       const token = extractTokenFromResponse(res);
       if (token) setAuthToken(token);
       return res;
-    })(email, password),
+    })(identifier, password),
 
   googleLogin: (idToken: string) =>
     (async (idToken: string) => {
@@ -108,28 +108,16 @@ export const authApi = {
       if (token) setAuthToken(token);
       return res;
     })(idToken),
-  register: (
-    name: string,
-    email: string,
-    phone: string,
-    country: string,
-    city: string,
-    gender: string,
-    termsAccepted: boolean,
-    password: string,
-  ) =>
+  register: (data: {
+    name: string;
+    email: string;
+    gender: "male" | "female" | "other";
+    termsAccepted: boolean;
+    password: string;
+  }) =>
     apiCall("/auth/sign-up", {
       method: "POST",
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        country,
-        city,
-        gender,
-        termsAccepted,
-        password,
-      }),
+      body: JSON.stringify(data),
     }),
 
   activateAccount: (email: string, code: string) =>
@@ -139,7 +127,10 @@ export const authApi = {
         body: JSON.stringify({ email, code }),
       });
       const token = extractTokenFromResponse(res);
-      if (token) setAuthToken(token);
+      if (!token) {
+        throw new Error("A conta foi ativada, mas não foi possível autenticar. Faça login para continuar.");
+      }
+      setAuthToken(token);
       return res;
     })(email, code),
 
@@ -147,6 +138,24 @@ export const authApi = {
     apiCall("/auth/resend-activation", {
       method: "POST",
       body: JSON.stringify({ email }),
+    }),
+
+  requestPasswordReset: (email: string) =>
+    apiCall<{ message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  verifyPasswordResetCode: (email: string, code: string) =>
+    apiCall<{ resetToken: string }>("/auth/verify-reset-code", {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    }),
+
+  resetPassword: (resetToken: string, password: string) =>
+    apiCall<{ message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ resetToken, password }),
     }),
 
   getMe: async () => {

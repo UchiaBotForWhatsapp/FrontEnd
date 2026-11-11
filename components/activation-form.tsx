@@ -40,8 +40,7 @@ export function ActivationForm() {
 
     setLoading(true)
     try {
-      console.log("Activating account for email:", email, "with code:", activationToken)
-      await authApi.activateAccount(email.trim(), activationToken.trim())
+      await authApi.activateAccount(email.trim(), code)
       setSuccess(true)
       setTimeout(() => {
         router.push("/plans")
@@ -149,6 +148,5 @@ export function ActivationForm() {
     </Card>
   )
 }
-
 
 

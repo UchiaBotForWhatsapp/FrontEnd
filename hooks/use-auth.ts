@@ -8,11 +8,11 @@ export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (identifier: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authApi.login(email, password);
+      const response = await authApi.login(identifier, password);
       setUser(response.user);
       return response;
     } catch (err: any) {
@@ -24,32 +24,18 @@ export function useAuth() {
   }, []);
 
   const register = useCallback(
-    async (
-      name: string,
-      email: string,
-      phone: string,
-      country: string,
-      city: string,
-      gender: string,
-      termsAccepted: boolean,
-      password: string,
-    ) => {
+    async (registrationData: {
+      name: string;
+      email: string;
+      gender: "male" | "female" | "other";
+      termsAccepted: boolean;
+      password: string;
+    }) => {
       setLoading(true);
       setError(null);
       try {
-        // Passando todos os campos para o client
-        const response = await authApi.register(
-          name,
-          email,
-          phone,
-          country,
-          city,
-          gender,
-          termsAccepted,
-          password,
-        );
+        const response = await authApi.register(registrationData);
 
-        setUser(response.user);
         return response;
       } catch (err: any) {
         setError(err.message);

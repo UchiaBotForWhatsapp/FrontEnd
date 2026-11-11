@@ -15,9 +15,9 @@ import { Eye, EyeOff, LogIn } from "lucide-react";
 export function LoginForm() {
   const router = useRouter();
   const { login, loading, error } = useAuth();
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [formError, setFormError] = useState("");
-  const [showPassword, setShowPasword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,20 +25,20 @@ export function LoginForm() {
   };
 
   function togglePassword() {
-    setShowPasword((prev) => !prev);
+    setShowPassword((prev) => !prev);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
 
-    if (!formData.email || !formData.password) {
+    if (!formData.identifier.trim() || !formData.password) {
       setFormError("Por favor, preencha todos os campos");
       return;
     }
 
     try {
-      await login(formData.email, formData.password);
+      await login(formData.identifier, formData.password);
       router.push("/dashboard");
     } catch (err: any) {
       setFormError(err.message);
@@ -59,17 +59,19 @@ export function LoginForm() {
             </div>
           )}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email
+            <label htmlFor="identifier" className="block text-sm font-medium mb-2">
+              Nome ou email
             </label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={formData.email}
+              id="identifier"
+              name="identifier"
+              type="text"
+              autoComplete="username"
+              placeholder="Seu nome ou email"
+              value={formData.identifier}
               onChange={handleChange}
               disabled={loading}
+              required
               className="bg-secondary border-border"
             />
           </div>
@@ -82,10 +84,12 @@ export function LoginForm() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder="********"
                 value={formData.password}
                 onChange={handleChange}
                 disabled={loading}
+                required
                 className="bg-secondary border-border pr-10"
               />
               <button
@@ -102,6 +106,11 @@ export function LoginForm() {
             <LogIn />
             {loading ? "Entrando..." : "Entrar"}
           </LoadingButton>
+          <div className="text-center text-sm">
+            <Link href="/forgot-password" className="text-accent hover:underline">
+              Esqueci a senha
+            </Link>
+          </div>
           <div className="text-center text-sm">
             Não tem conta?{" "}
             <Link href="/register" className="text-accent hover:underline">
