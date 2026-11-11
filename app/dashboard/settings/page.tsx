@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import type { FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { ChevronDown } from "lucide-react"
 
 import { Sidebar } from "@/components/sidebar"
 import { PlanSelectorSelected } from "@/components/plan-selected"
@@ -11,9 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
-import { authApi } from "@/lib/api-client"
+import { authApi, clearAuthToken } from "@/lib/api-client"
 
 type Gender = "male" | "female" | "other"
+type SettingsCard = "profile" | "password" | "plan" | "delete"
 
 interface User {
   id: string
@@ -44,6 +47,7 @@ const genderLabels: Record<Gender, string> = {
 }
 
 export default function SettingsPage() {
+  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [form, setForm] = useState<ProfileForm>({
     name: "",
@@ -59,6 +63,19 @@ export default function SettingsPage() {
     repeatPassword: "",
   })
   const [changingPassword, setChangingPassword] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState("")
+  const [deletingAccount, setDeletingAccount] = useState(false)
+  const [expandedCards, setExpandedCards] = useState<Record<SettingsCard, boolean>>({
+    profile: false,
+    password: false,
+    plan: false,
+    delete: false,
+  })
+
+  const toggleCard = (card: SettingsCard) => {
+    setExpandedCards((current) => ({ ...current, [card]: !current[card] }))
+  }
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -138,6 +155,25 @@ export default function SettingsPage() {
     }
   }
 
+  const handleDeleteAccount = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (deleteConfirmation !== "Deletar a minha Conta") {
+      toast.error("Digite exatamente: Deletar a minha Conta")
+      return
+    }
+
+    setDeletingAccount(true)
+    try {
+      await authApi.deleteAccount(deleteConfirmation)
+      clearAuthToken()
+      toast.success("Conta excluída com sucesso.")
+      router.replace("/login")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível excluir a conta.")
+      setDeletingAccount(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen bg-background">
@@ -168,11 +204,22 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold">Configurações</h1>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Perfil</CardTitle>
-              <CardDescription>Gerencie suas informações de perfil</CardDescription>
+              <button
+                type="button"
+                aria-label={expandedCards.profile ? "Recolher Perfil" : "Expandir Perfil"}
+                aria-expanded={expandedCards.profile}
+                aria-controls="profile-card-content"
+                onClick={() => toggleCard("profile")}
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <ChevronDown className={`size-5 transition-transform ${expandedCards.profile ? "rotate-180" : ""}`} />
+              </button>
             </CardHeader>
-            <CardContent className="space-y-4">
+            {expandedCards.profile && (
+            <CardContent id="profile-card-content" className="space-y-4">
+              <CardDescription>Gerencie suas informações de perfil</CardDescription>
               {editing ? (
                 <>
                   <div>
@@ -244,15 +291,27 @@ export default function SettingsPage() {
                 </>
               )}
             </CardContent>
+            )}
           </Card>
 
           {user.provider === "local" && (
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Redefinir senha</CardTitle>
-                <CardDescription>Altere a senha da sua conta</CardDescription>
+                <button
+                  type="button"
+                  aria-label={expandedCards.password ? "Recolher Redefinir senha" : "Expandir Redefinir senha"}
+                  aria-expanded={expandedCards.password}
+                  aria-controls="password-card-content"
+                  onClick={() => toggleCard("password")}
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  <ChevronDown className={`size-5 transition-transform ${expandedCards.password ? "rotate-180" : ""}`} />
+                </button>
               </CardHeader>
-              <CardContent>
+              {expandedCards.password && (
+              <CardContent id="password-card-content">
+                <CardDescription className="mb-4">Altere a senha da sua conta</CardDescription>
                 <form onSubmit={handleChangePassword} className="space-y-4">
                   <div>
                     <label htmlFor="current-password" className="mb-2 block text-sm font-medium">
@@ -306,20 +365,110 @@ export default function SettingsPage() {
                   </Button>
                 </form>
               </CardContent>
+              )}
             </Card>
           )}
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Plano</CardTitle>
-              <CardDescription>Gerencie seu plano de assinatura</CardDescription>
+              <button
+                type="button"
+                aria-label={expandedCards.plan ? "Recolher Plano" : "Expandir Plano"}
+                aria-expanded={expandedCards.plan}
+                aria-controls="plan-card-content"
+                onClick={() => toggleCard("plan")}
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <ChevronDown className={`size-5 transition-transform ${expandedCards.plan ? "rotate-180" : ""}`} />
+              </button>
             </CardHeader>
-            <CardContent>
+            {expandedCards.plan && (
+            <CardContent id="plan-card-content">
+              <CardDescription className="mb-4">Gerencie seu plano de assinatura</CardDescription>
               <PlanSelectorSelected />
             </CardContent>
+            )}
+          </Card>
+
+          <Card className="border-destructive/50">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-destructive">Excluir conta</CardTitle>
+              <button
+                type="button"
+                aria-label={expandedCards.delete ? "Recolher Excluir conta" : "Expandir Excluir conta"}
+                aria-expanded={expandedCards.delete}
+                aria-controls="delete-card-content"
+                onClick={() => toggleCard("delete")}
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <ChevronDown className={`size-5 transition-transform ${expandedCards.delete ? "rotate-180" : ""}`} />
+              </button>
+            </CardHeader>
+            {expandedCards.delete && (
+            <CardContent id="delete-card-content">
+              <CardDescription className="mb-4">
+                Esta ação é permanente e exclui sua conta e os dados associados.
+              </CardDescription>
+              <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+                Deletar a minha Conta
+              </Button>
+            </CardContent>
+            )}
           </Card>
         </div>
       </main>
+
+      {deleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
+            className="w-full max-w-md space-y-4 rounded-lg border bg-background p-6 shadow-lg"
+          >
+            <div className="space-y-2">
+              <h2 id="delete-account-title" className="text-lg font-semibold text-destructive">
+                Tem certeza que deseja excluir sua conta?
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Esta ação é permanente e também excluirá seus bots, produtos, clientes e conversas.
+                Para confirmar, digite <strong>Deletar a minha Conta</strong>.
+              </p>
+            </div>
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              <Input
+                autoFocus
+                value={deleteConfirmation}
+                onChange={(event) => setDeleteConfirmation(event.target.value)}
+                placeholder="Deletar a minha Conta"
+                disabled={deletingAccount}
+                required
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setDeleteDialogOpen(false)
+                    setDeleteConfirmation("")
+                  }}
+                  disabled={deletingAccount}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={deletingAccount || deleteConfirmation !== "Deletar a minha Conta"}
+                >
+                  {deletingAccount ? <Spinner className="size-4" /> : "Confirmar exclusão"}
+                </Button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

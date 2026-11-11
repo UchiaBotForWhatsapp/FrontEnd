@@ -192,6 +192,12 @@ export const authApi = {
       body: JSON.stringify({ currentPassword, newPassword }),
     }),
 
+  deleteAccount: (confirmation: string) =>
+    apiCall<{ message: string }>("/auth/me", {
+      method: "DELETE",
+      body: JSON.stringify({ confirmation }),
+    }),
+
   updatePlan: (plan: string) =>
     apiCall("/auth/me/plan", {
       method: "PUT",
