@@ -13,17 +13,17 @@ export default function PaymentConfirmationPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center space-y-4 mb-8">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-          <h1 className="text-4xl font-bold text-accent">Comprovativo Enviado!</h1>
+          <h1 className="text-4xl font-bold text-accent">Pagamento por referência</h1>
           <p className="text-xl text-muted-foreground">
-            Obrigado pelo pagamento
+            Depois de efetuar o pagamento, aguarde alguns minutos.
           </p>
         </div>
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">O que acontece agora?</CardTitle>
+            <CardTitle className="text-2xl">O que acontece após o pagamento?</CardTitle>
             <CardDescription>
-              Seu comprovativo foi enviado com sucesso
+              Não é necessário enviar comprovativo pelo WhatsApp.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -31,27 +31,9 @@ export default function PaymentConfirmationPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold">Verificação do Pagamento</p>
+                  <p className="font-semibold">Crédito das mensagens</p>
                   <p className="text-sm text-muted-foreground">
-                    Nossa equipe irá verificar o comprovativo enviado.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Ativação do Plano</p>
-                  <p className="text-sm text-muted-foreground">
-                    O administrador irá ativar seu plano em até 3 dias úteis.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Notificação</p>
-                  <p className="text-sm text-muted-foreground">
-                    Você receberá uma mensagem confirmando a ativação.
+                    Após o pagamento por referência, o número de mensagens incluído no seu plano será creditado no sistema em alguns minutos.
                   </p>
                 </div>
               </div>
@@ -61,7 +43,7 @@ export default function PaymentConfirmationPage() {
 
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">
-            Enquanto isso, você pode explorar as funcionalidades básicas da plataforma.
+            Pode continuar a utilizar a plataforma enquanto aguarda o crédito das mensagens.
           </p>
           <Button
             onClick={() => router.push("/welcome")}

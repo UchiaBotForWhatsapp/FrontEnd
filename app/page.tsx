@@ -38,7 +38,7 @@ export default function Landing() {
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
               <span className="text-accent-foreground font-bold text-sm">S</span>
             </div>
-            <span className="font-bold text-lg">KwanzaBot</span>
+            <span className="font-bold text-lg">Sefia</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm hover:text-accent transition">
