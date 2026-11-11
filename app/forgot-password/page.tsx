@@ -2,15 +2,22 @@ import { ForgotPasswordForm } from "@/components/forgot-password-form";
 
 export default function ForgotPasswordPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-card px-4">
-      <div className="flex w-full flex-col items-center gap-8">
-        <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-            <span className="font-bold text-accent-foreground">S</span>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-card px-4 py-8">
+      <div className="flex w-full max-w-6xl flex-col items-center gap-8 md:flex-row md:justify-between md:gap-16">
+        <div className="flex flex-col items-center gap-3 md:flex-1 md:items-start">
+          <div className="flex items-center gap-2">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-accent md:h-24 md:w-24">
+              <span className="text-3xl font-bold text-accent-foreground md:text-5xl">S</span>
+            </div>
+            <h1 className="text-5xl font-bold md:text-7xl">Sefia</h1>
           </div>
-          <h1 className="text-2xl font-bold">Sefia</h1>
+          <p className="text-center text-base text-muted-foreground md:text-left md:text-lg">
+            Capacitando empresas com automação inteligente
+          </p>
         </div>
-        <ForgotPasswordForm />
+        <div className="w-full md:flex-1 md:flex md:justify-end">
+          <ForgotPasswordForm />
+        </div>
       </div>
     </main>
   );

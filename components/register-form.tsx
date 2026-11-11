@@ -94,18 +94,18 @@ export function RegisterForm() {
 
   return (
     <>
-      <Card className="w-full max-w-md">
-        <CardHeader>
+      <Card className="w-full max-w-md md:gap-3 md:py-4">
+        <CardHeader className="md:px-5 md:gap-1">
           <CardTitle>Criar Conta</CardTitle>
           <CardDescription>
             Comece a gerenciar seus bots WhatsApp
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="md:px-5">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-2">
             <div>
-              <label htmlFor="name" className="mb-2 block text-sm font-medium">
+              <label htmlFor="name" className="mb-2 block text-sm font-medium md:mb-1">
                 Nome
               </label>
               <Input
@@ -121,7 +121,7 @@ export function RegisterForm() {
             </div>
 
             <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-medium">
+              <label htmlFor="email" className="mb-2 block text-sm font-medium md:mb-1">
                 Email
               </label>
               <Input
@@ -138,7 +138,7 @@ export function RegisterForm() {
             </div>
 
             <div>
-              <label htmlFor="gender" className="mb-2 block text-sm font-medium">
+              <label htmlFor="gender" className="mb-2 block text-sm font-medium md:mb-1">
                 Gênero
               </label>
               <Select
@@ -162,7 +162,7 @@ export function RegisterForm() {
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-2 block text-sm font-medium">
+              <label htmlFor="password" className="mb-2 block text-sm font-medium md:mb-1">
                 Senha
               </label>
               <div className="relative">
@@ -229,11 +229,13 @@ export function RegisterForm() {
               <LogIn />
               Criar Conta
             </LoadingButton>
-            <GoogleAuthButton
-              onCredential={handleGoogleRegistration}
-              requiresTermsAcceptance={!formData.termsAccepted}
-              mode="register"
-            />
+            <div className="md:col-span-2">
+              <GoogleAuthButton
+                onCredential={handleGoogleRegistration}
+                requiresTermsAcceptance={!formData.termsAccepted}
+                mode="register"
+              />
+            </div>
 
             <div className="text-center text-sm">
               Já tem conta?{" "}

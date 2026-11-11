@@ -52,15 +52,15 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
+    <Card className="w-full max-w-md md:gap-3 md:py-4">
+      <CardHeader className="md:px-5 md:gap-1">
         <CardTitle>Login</CardTitle>
         <CardDescription>Acesse sua conta Sefia</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="md:px-5">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-2">
           <div>
-            <label htmlFor="identifier" className="block text-sm font-medium mb-2">
+            <label htmlFor="identifier" className="mb-2 block text-sm font-medium md:mb-1">
               Nome ou email
             </label>
             <Input
@@ -77,7 +77,7 @@ export function LoginForm() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label htmlFor="password" className="mb-2 block text-sm font-medium md:mb-1">
               Senha
             </label>
             <div className="relative">
