@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useBots } from "@/hooks/use-bots";
-import { Trash2, Edit2, Plus } from "lucide-react";
+import { Bot as BotIcon, Trash2, Edit2, Plus } from "lucide-react";
 import { Modal } from "./modal";
 import { toast } from "sonner";
 import {
@@ -126,6 +126,7 @@ export function BotList() {
                   <div className="flex items-start gap-4 min-w-0">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <BotIcon className="size-7 shrink-0 text-accent" aria-hidden="true" />
                         <CardTitle className="text-xl">{bot.name}</CardTitle>
                       </div>
                       <CardDescription
