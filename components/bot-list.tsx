@@ -28,12 +28,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+interface BotItem {
+  _id: string;
+  name: string;
+  active: boolean;
+  description?: string;
+  plan?: string;
+  messages_count?: number;
+  products?: unknown[];
+}
+
 export function BotList() {
   const router = useRouter();
   const { bots, isLoading, deleteBot, toggleBot, mutate } = useBots();
-  const [botToDelete, setBotToDelete] = useState<any | null>(null);
+  const [botToDelete, setBotToDelete] = useState<BotItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [botLimitDialogOpen, setBotLimitDialogOpen] = useState(false);
@@ -43,7 +52,7 @@ export function BotList() {
     { active?: boolean; status?: string }
   >>({});
 
-  const OpenDeleteBot = (bot: any) => {
+  const OpenDeleteBot = (bot: BotItem) => {
     setBotToDelete(bot);
     setIsDialogOpen(true);
   };
@@ -51,7 +60,6 @@ export function BotList() {
   const handleConfirmDelete = async () => {
     if (!botToDelete) return;
 
-    setDeleting(true);
     try {
       await deleteBot(botToDelete._id);
       toast.success(`Bot ${botToDelete.name} excluído com sucesso!`);
@@ -60,12 +68,10 @@ export function BotList() {
     } catch (error) {
       console.error("Erro ao deletar bot", error);
       toast.error("Ocorreu um erro ao excluir o bot.");
-    } finally {
-      setDeleting(false);
     }
   };
 
-  const handleToggleBot = async (bot: any) => {
+  const handleToggleBot = async (bot: BotItem) => {
     if (!bot.active) {
       setActiveBotId(bot._id);
       setQrModalOpen(true);
@@ -76,7 +82,7 @@ export function BotList() {
 
     setTogglingId(bot._id);
     try {
-      const updated: any = await toggleBot(bot._id);
+      const updated = await toggleBot(bot._id);
       toast.success(`Bot ${updated.name} desativado com sucesso!`);
     } catch (error) {
       console.error("Erro ao atualizar bot", error);
@@ -113,14 +119,6 @@ export function BotList() {
       socket.off("bot:status", handleStatusEvent);
     };
   }, [mutate]);
-
-  const getInitials = (name?: string) => {
-    if (!name) return "B";
-    const parts = name.trim().split(" ");
-    const first = parts[0]?.[0] || "";
-    const second = parts.length > 1 ? parts[1]?.[0] || "" : "";
-    return (first + second).toUpperCase();
-  };
 
   const handleCreateBotClick = () => {
     if (bots.length > 0) {
@@ -194,7 +192,7 @@ export function BotList() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-          {bots.map((bot: any) => {
+          {bots.map((bot: BotItem) => {
             const isActive = statusMap[bot._id]?.active ?? bot.active;
 
             return (
