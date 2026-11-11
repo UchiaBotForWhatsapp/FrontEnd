@@ -243,17 +243,6 @@ export const botApi = {
       method: "DELETE",
     }),
 
-  toggle: (id: string) =>
-    apiCall(`/bots/${id}`, {
-      method: "PATCH",
-    }),
-
-  start: (id: string) =>
-    apiCall(`/bots/${id}/start`, {
-      method: "POST",
-    }),
-
-  getQrCode: (id: string) => apiCall<any>(`/bots/${id}/qr`),
 };
 
 export const planApi = {

@@ -50,29 +50,6 @@ export function useBots() {
     mutate((prev: any) => extractBotsList(prev).filter((bot: any) => bot._id !== id), false)
   }
 
-  const toggleBot = async (id: string) => {
-    const response = await botApi.toggle(id)
-    const updated = extractBotItem(response)
-    mutate(
-      (prev: any) =>
-        extractBotsList(prev).map((bot: any) => (bot._id === id ? updated : bot)),
-      false,
-    )
-    return updated
-  }
-
-  const startBot = async (id: string) => {
-    const response = await botApi.start(id)
-    const updated = extractBotItem(response)
-    mutate(
-      (prev: any) =>
-        extractBotsList(prev).map((bot: any) => (bot._id === id ? updated : bot)),
-      false,
-    )
-    return updated
-  }
-
-
   return {
     bots,
     isLoading,
@@ -81,7 +58,5 @@ export function useBots() {
     createBot,
     updateBot,
    deleteBot,
-   toggleBot,
-    startBot,
   }
 }

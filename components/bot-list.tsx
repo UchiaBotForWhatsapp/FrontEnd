@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { useBots } from "@/hooks/use-bots";
-import { Trash2, Edit2, Plus, Power } from "lucide-react";
-import { getWhatsAppSocket } from "@/lib/whatsapp-socket";
+import { Trash2, Edit2, Plus } from "lucide-react";
 import { Modal } from "./modal";
 import { toast } from "sonner";
-import { LoadingButton } from "./loading-button";
-import { BotQrModal } from "./bot-qr-modal";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +27,6 @@ import {
 interface BotItem {
   _id: string;
   name: string;
-  active: boolean;
   description?: string;
   plan?: string;
   messages_count?: number;
@@ -40,17 +35,10 @@ interface BotItem {
 
 export function BotList() {
   const router = useRouter();
-  const { bots, isLoading, deleteBot, toggleBot, mutate } = useBots();
+  const { bots, isLoading, deleteBot } = useBots();
   const [botToDelete, setBotToDelete] = useState<BotItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [qrModalOpen, setQrModalOpen] = useState(false);
   const [botLimitDialogOpen, setBotLimitDialogOpen] = useState(false);
-  const [activeBotId, setActiveBotId] = useState<string | null>(null);
-  const [statusMap, setStatusMap] = useState<Record<
-    string,
-    { active?: boolean; status?: string }
-  >>({});
 
   const OpenDeleteBot = (bot: BotItem) => {
     setBotToDelete(bot);
@@ -70,60 +58,6 @@ export function BotList() {
       toast.error("Ocorreu um erro ao excluir o bot.");
     }
   };
-
-  const handleToggleBot = async (bot: BotItem) => {
-    if (!bot.active) {
-      setActiveBotId(bot._id);
-      setQrModalOpen(true);
-      setTogglingId(bot._id);
-      // Removido: await startBot(bot._id);
-      return;
-    }
-
-    setTogglingId(bot._id);
-    try {
-      const updated = await toggleBot(bot._id);
-      toast.success(`Bot ${updated.name} desativado com sucesso!`);
-    } catch (error) {
-      console.error("Erro ao atualizar bot", error);
-      toast.error("Erro ao atualizar bot");
-    } finally {
-      setTogglingId(null);
-    }
-  };
-
-  useEffect(() => {
-    const socket = getWhatsAppSocket();
-    if (!socket) {
-      const interval = window.setInterval(() => mutate(), 5000);
-      return () => window.clearInterval(interval);
-    }
-
-    const handleStatusEvent = (payload: {
-      botId?: string;
-      active?: boolean;
-      status?: string;
-    }) => {
-      const botId = payload?.botId;
-      if (!botId) return;
-
-      setStatusMap((prev) => ({
-        ...prev,
-        [botId]: {
-          active: payload.active ?? prev[botId]?.active,
-          status: payload.status ?? prev[botId]?.status,
-        },
-      }));
-
-      mutate();
-    };
-
-    socket.on("bot:status", handleStatusEvent);
-
-    return () => {
-      socket.off("bot:status", handleStatusEvent);
-    };
-  }, [mutate]);
 
   const handleCreateBotClick = () => {
     if (bots.length > 0) {
@@ -148,22 +82,6 @@ export function BotList() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-
-      {activeBotId && (
-        <BotQrModal
-          botId={activeBotId}
-          open={qrModalOpen}
-          onClose={() => {
-            setQrModalOpen(false);
-            setActiveBotId(null);
-            setTogglingId(null);
-          }}
-          onSuccess={() => {
-            setTogglingId(null);
-            mutate();
-          }}
-        />
-      )}
 
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Meus Bots</h1>
@@ -198,8 +116,6 @@ export function BotList() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
           {bots.map((bot: BotItem) => {
-            const isActive = statusMap[bot._id]?.active ?? bot.active;
-
             return (
               <Card
                 key={bot._id}
@@ -211,15 +127,6 @@ export function BotList() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <CardTitle className="text-xl">{bot.name}</CardTitle>
-                        <Badge
-                          variant={isActive ? "default" : "secondary"}
-                          className="bg-accent"
-                        >
-                          {isActive ? "Ativo" : "Inativo"}
-                        </Badge>
-                        {bot.plan && (
-                          <Badge variant="outline">{bot.plan}</Badge>
-                        )}
                       </div>
                       <CardDescription
                         className="line-clamp-2"
@@ -235,22 +142,6 @@ export function BotList() {
                     </div>
                   </div>
 
-                  <div className="flex-shrink-0 self-start">
-                    <LoadingButton
-                      loading={togglingId === bot._id}
-                      type="button"
-                      onClick={() => handleToggleBot(bot)}
-                      variant={isActive ? "outline" : "default"}
-                      className={
-                        isActive
-                          ? "border-accent text-accent hover:bg-accent/10"
-                          : "bg-accent hover:bg-accent/90"
-                      }
-                    >
-                      <Power className="w-4 h-4" />
-                      {isActive ? "Desativar" : "Ativar"}
-                    </LoadingButton>
-                  </div>
                 </div>
               </CardHeader>
               <CardContent>
