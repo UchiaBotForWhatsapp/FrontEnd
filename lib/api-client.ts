@@ -2,6 +2,18 @@ export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL;
 let inMemoryAuthToken: string | null = null;
 
+export type BotType = "personal" | "business";
+
+export interface BotInput {
+  name: string;
+  type: BotType;
+  description: string;
+  phoneNumber: string;
+  language: string;
+}
+
+export type BotData = Partial<BotInput> & Pick<BotInput, "name">;
+
 export function setAuthToken(token: string | null) {
   inMemoryAuthToken = token;
   if (typeof window !== "undefined") {
@@ -208,7 +220,7 @@ export const authApi = {
 export const botApi = {
   list: () => apiCall("/bots"),
 
-  create: (data: any) => {
+  create: (data: BotInput) => {
     const body = data instanceof FormData ? data : JSON.stringify(data);
     return apiCall("/bots", {
       method: "POST",
@@ -216,9 +228,9 @@ export const botApi = {
     });
   },
 
-  get: (id: string) => apiCall(`/bots/${id}`),
+  get: (id: string) => apiCall<{ status: string; bot: BotData }>(`/bots/${id}`),
 
-  update: (id: string, data: any) => {
+  update: (id: string, data: BotInput) => {
     const body = data instanceof FormData ? data : JSON.stringify(data);
     return apiCall(`/bots/${id}`, {
       method: "PUT",

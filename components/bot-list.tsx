@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,14 +20,23 @@ import { Modal } from "./modal";
 import { toast } from "sonner";
 import { LoadingButton } from "./loading-button";
 import { BotQrModal } from "./bot-qr-modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function BotList() {
+  const router = useRouter();
   const { bots, isLoading, deleteBot, toggleBot, mutate } = useBots();
   const [botToDelete, setBotToDelete] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [botLimitDialogOpen, setBotLimitDialogOpen] = useState(false);
   const [activeBotId, setActiveBotId] = useState<string | null>(null);
   const [statusMap, setStatusMap] = useState<Record<
     string,
@@ -112,8 +122,30 @@ export function BotList() {
     return (first + second).toUpperCase();
   };
 
+  const handleCreateBotClick = () => {
+    if (bots.length > 0) {
+      setBotLimitDialogOpen(true);
+      return;
+    }
+
+    router.push("/dashboard/bot/new");
+  };
+
   return (
     <div className="space-y-6">
+      <Dialog open={botLimitDialogOpen} onOpenChange={setBotLimitDialogOpen}>
+        <DialogContent className="w-[95%] max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Por enquanto, apenas um bot por conta</DialogTitle>
+            <DialogDescription>
+              Cada conta pode ter apenas um bot neste momento. Estamos trabalhando
+              para ampliar essa capacidade e permitir que você crie mais bots em
+              breve. Obrigado pela compreensão!
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
       {activeBotId && (
         <BotQrModal
           botId={activeBotId}
@@ -132,12 +164,13 @@ export function BotList() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Meus Bots</h1>
-        <Link href="/dashboard/bot/new">
-          <Button className="bg-accent hover:bg-accent/90 gap-2 cursor-pointer">
-            <Plus className="w-4 h-4" />
-            Novo Bot
-          </Button>
-        </Link>
+        <Button
+          onClick={handleCreateBotClick}
+          className="bg-accent hover:bg-accent/90 gap-2 cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          Novo Bot
+        </Button>
       </div>
 
       {isLoading ? (
@@ -172,20 +205,6 @@ export function BotList() {
               <CardHeader className="pb-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex items-start gap-4 min-w-0">
-                    <div className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
-                      {bot.avatar ? (
-                        <img
-                          src={bot.avatar}
-                          alt={`Avatar do bot ${bot.name}`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-sm font-semibold text-muted-foreground">
-                          {getInitials(bot.name)}
-                        </span>
-                      )}
-                    </div>
-
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <CardTitle className="text-xl">{bot.name}</CardTitle>
