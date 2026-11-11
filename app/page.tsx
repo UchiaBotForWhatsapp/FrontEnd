@@ -36,7 +36,7 @@ export default function Landing() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-accent-foreground font-bold text-sm">KB</span>
+              <span className="text-accent-foreground font-bold text-sm">S</span>
             </div>
             <span className="font-bold text-lg">KwanzaBot</span>
           </div>
@@ -156,10 +156,10 @@ export default function Landing() {
             {/* WhatsApp-like header */}
             <div className="bg-muted p-4 border-b border-border flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-sm">
-                KB
+                S
               </div>
               <div>
-                <h4 className="font-semibold text-sm">Kwanza Bot Support</h4>
+                <h4 className="font-semibold text-sm">Sefia Support</h4>
                 <p className="text-xs text-muted-foreground">online</p>
               </div>
             </div>
@@ -272,7 +272,7 @@ export default function Landing() {
         <div className="bg-card border border-accent/30 rounded-lg p-8 md:p-12 text-center">
           <h2 className="text-3xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Junte-se a milhares de empresas que já estão automatizando seu atendimento com Kwanza Bot
+            Junte-se a milhares de empresas que já estão automatizando seu atendimento com Sefia
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
@@ -301,9 +301,9 @@ export default function Landing() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center">
-                <span className="text-accent-foreground font-bold text-xs">KB</span>
+                <span className="text-accent-foreground font-bold text-xs">S</span>
               </div>
-              <span className="font-bold">Kwanza Bot</span>
+              <span className="font-bold">Sefia</span>
               </div>
               <p className="text-sm text-muted-foreground">Plataforma inteligente de automação WhatsApp</p>
             </div>
@@ -364,7 +364,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2026 Kwanza Bot. Todos os direitos reservados.</p>
+            <p>© 2026 Sefia. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>

@@ -9,7 +9,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Kwanza Bot - Plataforma de Chatbot WhatsApp",
+  title: "Sefia - Plataforma de Chatbot WhatsApp",
   description: "Gerencie seus bots WhatsApp com facilidade",
   icons: {
     icon: [
@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background text-foreground min-h-screen">
         {children}
         <Analytics />
-        <Toaster richColors />
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -15,32 +14,31 @@ import {
 } from "@/components/ui/card";
 import { authApi } from "@/lib/api-client";
 import { LoadingButton } from "./loading-button";
+import { toast } from "sonner";
 
 export function ResetPasswordForm() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-
     if (password.length < 8) {
-      setError("A senha deve ter pelo menos 8 caracteres.");
+      toast.error("A senha deve ter pelo menos 8 caracteres.");
       return;
     }
 
     if (password !== repeatPassword) {
-      setError("As senhas não correspondem.");
+      toast.error("As senhas não correspondem.");
       return;
     }
 
     const resetToken = sessionStorage.getItem("passwordResetToken");
     if (!resetToken) {
-      setError("Sua sessão expirou. Solicite um novo código de redefinição.");
+      toast.error("Sua sessão expirou. Solicite um novo código de redefinição.");
+      router.push("/forgot-password");
       return;
     }
 
@@ -49,9 +47,10 @@ export function ResetPasswordForm() {
       await authApi.resetPassword(resetToken, password);
       sessionStorage.removeItem("passwordResetToken");
       setSuccess(true);
+      toast.success("Senha alterada com sucesso. Faça login com sua nova senha.");
       window.setTimeout(() => router.push("/login"), 1800);
     } catch (resetError) {
-      setError(
+      toast.error(
         resetError instanceof Error
           ? resetError.message
           : "Não foi possível alterar sua senha.",
@@ -71,28 +70,6 @@ export function ResetPasswordForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-              {error.includes("Solicite um novo código") && (
-                <>
-                  {" "}
-                  <Link
-                    href="/forgot-password"
-                    className="underline underline-offset-4"
-                  >
-                    Solicitar código
-                  </Link>
-                </>
-              )}
-            </div>
-          )}
-          {success && (
-            <div className="rounded-lg border border-border bg-secondary p-3 text-sm">
-              Senha alterada com sucesso. Redirecionando para o login...
-            </div>
-          )}
-
           <div>
             <label
               htmlFor="new-password"
@@ -135,7 +112,7 @@ export function ResetPasswordForm() {
             disabled={success}
             className="w-full bg-accent hover:bg-accent/90"
           >
-            {loading ? "Alterando..." : "Alterar senha"}
+            Alterar senha
           </LoadingButton>
         </form>
       </CardContent>

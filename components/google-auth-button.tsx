@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const GOOGLE_SCRIPT_URL = "https://accounts.google.com/gsi/client";
 let googleScriptPromise: Promise<void> | null = null;
@@ -54,19 +55,17 @@ export function GoogleAuthButton({
   const containerRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   onCredentialRef.current = onCredential;
 
   useEffect(() => {
     let mounted = true;
     setReady(false);
-    setError("");
 
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
     if (!clientId) {
-      setError("Login Google não configurado.");
+      toast.error("Login Google não configurado.");
       return;
     }
 
@@ -81,12 +80,11 @@ export function GoogleAuthButton({
           auto_select: false,
           callback: async ({ credential }) => {
             if (!credential || !mounted) return;
-            setError("");
             setLoading(true);
             try {
               await onCredentialRef.current(credential);
             } catch (authError) {
-              setError(
+              toast.error(
                 authError instanceof Error
                   ? authError.message
                   : "Não foi possível autenticar com o Google.",
@@ -108,11 +106,10 @@ export function GoogleAuthButton({
           locale: "pt_BR",
         });
         setReady(true);
-        setError("");
       })
       .catch((scriptError: unknown) => {
         if (mounted) {
-          setError(
+          toast.error(
             scriptError instanceof Error
               ? scriptError.message
               : "Não foi possível inicializar o login do Google.",
@@ -128,12 +125,12 @@ export function GoogleAuthButton({
 
   const handleClick = () => {
     if (requiresTermsAcceptance) {
-      setError("Aceita os termos");
+      toast.error("Aceita os termos");
       return;
     }
 
     if (!ready) {
-      setError("O login do Google ainda está carregando. Tente novamente.");
+      toast.error("Não foi possível iniciar o login do Google. Tente novamente.");
     }
   };
 
@@ -145,10 +142,14 @@ export function GoogleAuthButton({
           variant="outline"
           onClick={handleClick}
           disabled={loading || (!ready && !requiresTermsAcceptance)}
+          aria-busy={loading || !ready}
           className="h-11 w-full border-black bg-black text-white hover:border-zinc-800 hover:bg-zinc-800 hover:text-white"
         >
-          {loading ? (
-            <span className="size-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          {loading || !ready ? (
+            <span
+              aria-label={loading ? "Conectando" : "Carregando"}
+              className="size-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+            />
           ) : (
             <svg
               aria-hidden="true"
@@ -175,11 +176,7 @@ export function GoogleAuthButton({
               />
             </svg>
           )}
-          {loading
-            ? "Conectando..."
-            : ready
-              ? "Entrar com Google"
-              : "Carregando Google..."}
+          {!loading && (mode === "register" ? "Criar conta com Google" : "Entrar com Google")}
         </Button>
         <div
           ref={containerRef}
@@ -187,11 +184,6 @@ export function GoogleAuthButton({
           className={`absolute inset-0 flex w-full justify-center opacity-0 ${ready && !loading && !requiresTermsAcceptance ? "pointer-events-auto" : "pointer-events-none"}`}
         />
       </div>
-      {error && (
-        <p role="alert" className="text-center text-sm text-destructive">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

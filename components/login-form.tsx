@@ -12,12 +12,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { GoogleAuthButton } from "./google-auth-button";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
-  const { login, googleLogin, loading, error } = useAuth();
+  const { login, googleLogin, loading } = useAuth();
   const [formData, setFormData] = useState({ identifier: "", password: "" });
-  const [formError, setFormError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,23 +31,23 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError("");
-
     if (!formData.identifier.trim() || !formData.password) {
-      setFormError("Por favor, preencha todos os campos");
+      toast.error("Por favor, preencha todos os campos");
       return;
     }
 
     try {
       await login(formData.identifier, formData.password);
+      toast.success("Login executado com sucesso. Bem-vindo!");
       router.push("/dashboard");
-    } catch (err: any) {
-      setFormError(err.message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao tentar entrar.");
     }
   };
 
   const handleGoogleLogin = async (idToken: string) => {
     const response = await googleLogin(idToken, "login");
+    toast.success("Login executado com sucesso. Bem-vindo!");
     router.push(response.isNewUser ? "/plans" : "/dashboard");
   };
 
@@ -55,15 +55,10 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Login</CardTitle>
-        <CardDescription>Acesse sua conta Kwanza Bot</CardDescription>
+        <CardDescription>Acesse sua conta Sefia</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {(formError || error) && (
-            <div className="p-3 bg-destructive/10 border border-destructive rounded-lg text-sm text-destructive">
-              {formError || error}
-            </div>
-          )}
           <div>
             <label htmlFor="identifier" className="block text-sm font-medium mb-2">
               Nome ou email
@@ -110,7 +105,7 @@ export function LoginForm() {
           </div>
           <LoadingButton type="submit" loading={loading} className="w-full bg-accent hover:bg-accent/90 cursor-pointer">
             <LogIn />
-            {loading ? "Entrando..." : "Entrar"}
+            Entrar
           </LoadingButton>
           <GoogleAuthButton onCredential={handleGoogleLogin} mode="login" />
           <div className="text-center text-sm">

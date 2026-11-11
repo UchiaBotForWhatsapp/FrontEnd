@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { authApi } from "@/lib/api-client";
 import { LoadingButton } from "./loading-button";
+import { toast } from "sonner";
 
 export function ForgotPasswordForm() {
   const router = useRouter();
@@ -24,21 +25,16 @@ export function ForgotPasswordForm() {
   const [codeRequested, setCodeRequested] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-
   const requestCode = async () => {
-    setError("");
-    setMessage("");
     setLoading(true);
     try {
       await authApi.requestPasswordReset(email.trim().toLowerCase());
       setCodeRequested(true);
-      setMessage(
+      toast.success(
         "Se o email estiver associado a uma conta ativa, enviaremos um código.",
       );
     } catch (requestError) {
-      setError(
+      toast.error(
         requestError instanceof Error
           ? requestError.message
           : "Não foi possível solicitar o código.",
@@ -59,8 +55,6 @@ export function ForgotPasswordForm() {
     event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
     setLoading(true);
     try {
       const result = await authApi.verifyPasswordResetCode(
@@ -68,9 +62,10 @@ export function ForgotPasswordForm() {
         code,
       );
       sessionStorage.setItem("passwordResetToken", result.resetToken);
+      toast.success("Código verificado com sucesso.");
       router.push("/reset-password");
     } catch (verificationError) {
-      setError(
+      toast.error(
         verificationError instanceof Error
           ? verificationError.message
           : "Não foi possível validar o código.",
@@ -101,17 +96,6 @@ export function ForgotPasswordForm() {
           onSubmit={codeRequested ? handleVerifySubmit : handleRequestSubmit}
           className="space-y-4"
         >
-          {error && (
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          {message && (
-            <div className="rounded-lg border border-border bg-secondary p-3 text-sm">
-              {message}
-            </div>
-          )}
-
           {!codeRequested ? (
             <div>
               <label htmlFor="email" className="mb-2 block text-sm font-medium">
@@ -132,7 +116,7 @@ export function ForgotPasswordForm() {
                 loading={loading}
                 className="mt-4 w-full bg-accent hover:bg-accent/90"
               >
-                {loading ? "Enviando..." : "Enviar código"}
+                Enviar código
               </LoadingButton>
             </div>
           ) : (
@@ -165,7 +149,7 @@ export function ForgotPasswordForm() {
                 disabled={code.length !== 6}
                 className="w-full bg-accent hover:bg-accent/90"
               >
-                {loading ? "Verificando..." : "Verificar código"}
+                Verificar código
               </LoadingButton>
               <div className="text-center text-sm">
                 Não recebeu o código?{" "}
@@ -176,7 +160,8 @@ export function ForgotPasswordForm() {
                   onClick={handleResend}
                   disabled={loading || resending}
                 >
-                  {resending ? "Reenviando..." : "Enviar novamente"}
+                  {resending && <span aria-label="Reenviando" className="mr-1 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent align-middle" />}
+                  Enviar novamente
                 </Button>
               </div>
             </>

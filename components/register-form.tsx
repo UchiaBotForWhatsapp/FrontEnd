@@ -26,13 +26,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { LoadingButton } from "./loading-button";
 import { TermsModal } from "./terms-modal";
 import { GoogleAuthButton } from "./google-auth-button";
+import { toast } from "sonner";
 
 type Gender = "male" | "female" | "other";
 
 export function RegisterForm() {
   const router = useRouter();
-  const { register, googleLogin, loading, error } = useAuth();
-  const [formError, setFormError] = useState("");
+  const { register, googleLogin, loading } = useAuth();
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,20 +50,18 @@ export function RegisterForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError("");
-
     if (!formData.name.trim() || !formData.email.trim() || !formData.gender || !formData.password) {
-      setFormError("Por favor, preencha todos os campos");
+      toast.error("Por favor, preencha todos os campos");
       return;
     }
 
     if (formData.password.length < 8) {
-      setFormError("A senha deve ter pelo menos 8 caracteres");
+      toast.error("A senha deve ter pelo menos 8 caracteres");
       return;
     }
 
     if (!formData.termsAccepted) {
-      setFormError("Você deve aceitar os Termos e Condições para continuar");
+      toast.error("Aceita os termos");
       return;
     }
 
@@ -77,9 +75,10 @@ export function RegisterForm() {
         password: formData.password,
         termsAccepted: formData.termsAccepted,
       });
+      toast.success("Conta criada! Verifique seu email para ativar a conta.");
       router.push(`/activate/${encodeURIComponent(email)}`);
     } catch (submitError) {
-      setFormError(
+      toast.error(
         submitError instanceof Error
           ? submitError.message
           : "Não foi possível criar sua conta",
@@ -89,6 +88,7 @@ export function RegisterForm() {
 
   const handleGoogleRegistration = async (idToken: string) => {
     const response = await googleLogin(idToken, "register", formData.termsAccepted);
+    toast.success("Conta criada com sucesso. Bem-vindo!");
     router.push(response.isNewUser ? "/plans" : "/dashboard");
   };
 
@@ -104,12 +104,6 @@ export function RegisterForm() {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {(formError || error) && (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                {formError || error}
-              </div>
-            )}
-
             <div>
               <label htmlFor="name" className="mb-2 block text-sm font-medium">
                 Nome
@@ -233,7 +227,7 @@ export function RegisterForm() {
               className="w-full cursor-pointer bg-accent hover:bg-accent/90"
             >
               <LogIn />
-              {loading ? "Criando conta..." : "Criar Conta"}
+              Criar Conta
             </LoadingButton>
             <GoogleAuthButton
               onCredential={handleGoogleRegistration}
