@@ -161,6 +161,8 @@ export function BotQrModal({
     if (!open || !botId) return;
 
     const socket = getWhatsAppSocket();
+    if (!socket) return;
+
     const eventName = `bot:${botId}:qr`;
     const handleQr = (payload: { qr?: string; message?: string }) => {
       if (payload?.qr) {

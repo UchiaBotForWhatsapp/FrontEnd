@@ -77,6 +77,7 @@ export function useBots() {
     bots,
     isLoading,
     error,
+    mutate,
     createBot,
     updateBot,
    deleteBot,

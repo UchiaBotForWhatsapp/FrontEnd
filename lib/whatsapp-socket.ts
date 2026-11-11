@@ -1,21 +1,22 @@
 import { io, type Socket } from "socket.io-client";
-import { API_BASE_URL, getAuthToken } from "./api-client";
-
-const DEFAULT_WEBSOCKET_URL = (API_BASE_URL || "http://localhost:3001/api").replace(/\/api\/?$/, "");
+import { getAuthToken } from "./api-client";
 
 let websocket: Socket | null = null;
 
-function getSocketUrl() {
-  const override = process.env.NEXT_PUBLIC_WEBSOCKET_URL?.replace(/\/$/, "");
-  return override || DEFAULT_WEBSOCKET_URL;
+function getSocketUrl(): string | null {
+  const url = process.env.NEXT_PUBLIC_WEBSOCKET_URL?.trim().replace(/\/$/, "");
+  return url || null;
 }
 
-export function getWhatsAppSocket() {
+export function getWhatsAppSocket(): Socket | null {
   if (websocket) return websocket;
+
+  const socketUrl = getSocketUrl();
+  if (!socketUrl) return null;
 
   const token = getAuthToken();
 
-  websocket = io(getSocketUrl(), {
+  websocket = io(socketUrl, {
     transports: ["websocket"],
     auth: token ? { token } : undefined,
   });

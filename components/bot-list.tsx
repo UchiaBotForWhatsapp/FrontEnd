@@ -94,19 +94,24 @@ export function BotList() {
 
   useEffect(() => {
     const socket = getWhatsAppSocket();
+    if (!socket) {
+      const interval = window.setInterval(() => mutate(), 5000);
+      return () => window.clearInterval(interval);
+    }
 
     const handleStatusEvent = (payload: {
       botId?: string;
       active?: boolean;
       status?: string;
     }) => {
-      if (!payload?.botId) return;
+      const botId = payload?.botId;
+      if (!botId) return;
 
       setStatusMap((prev) => ({
         ...prev,
-        [payload.botId]: {
-          active: payload.active ?? prev[payload.botId]?.active,
-          status: payload.status ?? prev[payload.botId]?.status,
+        [botId]: {
+          active: payload.active ?? prev[botId]?.active,
+          status: payload.status ?? prev[botId]?.status,
         },
       }));
 
