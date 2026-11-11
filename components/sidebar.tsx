@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { authApi } from "@/lib/api-client";
 import {
+  LayoutDashboard,
   MessageCircle,
   Settings,
   LogOut,
@@ -41,7 +42,8 @@ export function Sidebar() {
   }, []);
 
   const navItems = [
-    { href: "/dashboard", label: "Meus Bots", icon: MessageCircle },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/bots", label: "Meus Bots", icon: MessageCircle },
     { href: "/dashboard/myproducts", label: "Meus Produtos", icon: Package },
     { href: "/dashboard/settings", label: "Configurações", icon: Settings },
   ];
@@ -93,7 +95,6 @@ export function Sidebar() {
               </span>
             </div>
             <span className="min-w-0">
-              <span className="block text-xs text-sidebar-foreground/70">Olá,</span>
               <span className="block truncate font-bold text-sm">
                 {userName.split(/\s+/)[0] || "Usuário"}
               </span>
@@ -109,7 +110,9 @@ export function Sidebar() {
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href ||
+              (item.href === "/bots" && pathname.startsWith("/bots/"));
 
             return (
               <Link

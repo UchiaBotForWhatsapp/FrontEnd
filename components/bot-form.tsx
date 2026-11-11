@@ -88,7 +88,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
       }
 
       toast.success(`Bot ${payload.name} ${botId ? "atualizado" : "criado"} com sucesso!`);
-      router.push("/dashboard");
+      router.push("/bots");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível salvar o bot.");
     } finally {
@@ -98,7 +98,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
 
   return (
     <div className="space-y-6">
-      <Link href="/dashboard" className="flex w-fit items-center gap-2 text-accent hover:underline">
+      <Link href="/bots" className="flex w-fit items-center gap-2 text-accent hover:underline">
         <ArrowLeft className="size-4" />
         Voltar
       </Link>
@@ -196,7 +196,7 @@ export function BotForm({ botId, initialData }: BotFormProps) {
               <LoadingButton loading={loading} type="submit" className="bg-accent hover:bg-accent/90">
                 {botId ? "Salvar alterações" : "Criar bot"}
               </LoadingButton>
-              <Link href="/dashboard">
+              <Link href="/bots">
                 <Button type="button" variant="outline" disabled={loading}>
                   Cancelar
                 </Button>

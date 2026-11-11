@@ -1,5 +1,5 @@
 import { Sidebar } from "@/components/sidebar"
-import { BotList } from "@/components/bot-list"
+import { DashboardOverview } from "@/components/dashboard-overview"
 
 export default function DashboardPage() {
   return (
@@ -7,7 +7,7 @@ export default function DashboardPage() {
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <div className="p-4 pt-16 md:p-8 max-w-7xl mx-auto">
-          <BotList />
+          <DashboardOverview />
         </div>
       </main>
     </div>

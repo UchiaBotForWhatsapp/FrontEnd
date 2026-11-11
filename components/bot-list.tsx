@@ -80,7 +80,7 @@ export function BotList() {
       return;
     }
 
-    router.push("/dashboard/bot/new");
+    router.push("/bots/new");
   };
 
   return (
@@ -120,7 +120,7 @@ export function BotList() {
               <p className="text-muted-foreground">
                 Você ainda não tem nenhum bot criado
               </p>
-              <Link href="/dashboard/bot/new">
+              <Link href="/bots/new">
                 <Button className="bg-accent hover:bg-accent/90">
                   Criar Primeiro Bot
                 </Button>
@@ -191,7 +191,7 @@ export function BotList() {
                       )}
                       {bot.active ? "Desativar" : "Ativar"}
                     </Button>
-                    <Link href={`/dashboard/bot/${bot._id}`}>
+                    <Link href={`/bots/${bot._id}`}>
                       <Button
                         size="sm"
                         variant="ghost"

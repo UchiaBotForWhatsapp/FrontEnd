@@ -259,6 +259,21 @@ export const planApi = {
     }),
 };
 
+export const dashboardApi = {
+  summary: () =>
+    apiCall<{
+      status: string;
+      summary: {
+        user: { name: string; plan: string };
+        botsCount: number;
+        activeBotsCount: number;
+        productsCount: number;
+        messagesSent: number;
+        messagesAvailable: number;
+      };
+    }>("/dashboard/summary"),
+};
+
 export const productApi = {
   list: () => apiCall("/products"),
 
