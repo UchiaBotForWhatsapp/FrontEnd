@@ -152,7 +152,7 @@ export function BotList() {
                       variant="outline"
                       onClick={() => handleToggleBot(bot)}
                       disabled={togglingBotId === bot._id}
-                      aria-label={`${bot.active ? "Desativar" : "Ativar"} bot ${bot.name}`}
+                      aria-label={`${bot.active ? "Desconectar" : "Conectar"} bot ${bot.name}`}
                       className={
                         bot.active
                           ? "h-8 shrink-0 gap-2 rounded-full border-emerald-500/30 bg-emerald-500/10 px-3 text-emerald-500 hover:bg-emerald-500/15 hover:text-emerald-400"
@@ -164,7 +164,7 @@ export function BotList() {
                       ) : (
                         <Power className="size-4" />
                       )}
-                      {bot.active ? "Desativar" : "Ativar"}
+                      {bot.active ? "Desconectar" : "Conectar"}
                     </Button>
                   </div>
                   <div className="min-w-0">
