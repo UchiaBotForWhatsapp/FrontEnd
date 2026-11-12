@@ -12,8 +12,10 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
+  ChevronLeft,
+  ChevronRight,
   Package,
+  X,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -21,6 +23,7 @@ export function Sidebar() {
   const router = useRouter();
   const { logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
@@ -78,23 +81,27 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
+        id="app-sidebar"
         className={`
-          fixed top-0 left-0 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform z-50
+          fixed top-0 left-0 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-[transform,width] z-50
           ${open ? "translate-x-0" : "-translate-x-full"} 
-          md:translate-x-0 md:static
+          md:translate-x-0 md:static md:shrink-0
+          ${collapsed ? "md:w-20" : "md:w-64"}
         `}
       >
-        <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
+        <div className="p-6 md:p-4 border-b border-sidebar-border flex items-center justify-between">
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 hover:opacity-80 transition"
+            className={`flex min-w-0 items-center gap-3 hover:opacity-80 transition ${
+              collapsed ? "md:justify-center" : ""
+            }`}
           >
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sidebar-primary">
               <span className="text-sidebar-primary-foreground font-bold text-lg">
                 {userName.charAt(0).toUpperCase() || "U"}
               </span>
             </div>
-            <span className="min-w-0">
+            <span className={`min-w-0 ${collapsed ? "md:hidden" : ""}`}>
               <span className="block truncate font-bold text-sm">
                 {userName.split(/\s+/)[0] || "Usuário"}
               </span>
@@ -118,7 +125,11 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                title={collapsed ? item.label : undefined}
+                aria-label={item.label}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${
+                  collapsed ? "md:justify-center md:px-0" : ""
+                } ${
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground"
                     : "text-sidebar-foreground hover:bg-sidebar-accent/50"
@@ -126,7 +137,9 @@ export function Sidebar() {
                 onClick={() => setOpen(false)} // Fecha sidebar em mobile ao clicar
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-sm">{item.label}</span>
+                <span className={`text-sm ${collapsed ? "md:hidden" : ""}`}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
@@ -136,10 +149,36 @@ export function Sidebar() {
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="w-full justify-start gap-3 border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/50 bg-transparent"
+            title={collapsed ? "Sair" : undefined}
+            className={`w-full justify-start gap-3 border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent/50 bg-transparent ${
+              collapsed ? "md:justify-center md:px-0" : ""
+            }`}
           >
             <LogOut className="w-5 h-5" />
-            <span className="text-sm">Sair</span>
+            <span className={`text-sm ${collapsed ? "md:hidden" : ""}`}>
+              Sair
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+            aria-expanded={!collapsed}
+            aria-controls="app-sidebar"
+            title={collapsed ? "Expandir menu" : "Recolher menu"}
+            onClick={() => setCollapsed((current) => !current)}
+            className={`hidden w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/50 md:flex ${
+              collapsed ? "md:justify-center md:px-0" : ""
+            }`}
+          >
+            {collapsed ? (
+              <ChevronRight className="w-5 h-5" />
+            ) : (
+              <ChevronLeft className="w-5 h-5" />
+            )}
+            <span className={`text-sm ${collapsed ? "md:hidden" : ""}`}>
+              Recolher menu
+            </span>
           </Button>
         </div>
       </aside>

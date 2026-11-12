@@ -138,7 +138,7 @@ export function DashboardOverview() {
               </span>
             </p>
             <Button asChild variant="outline">
-              <Link href="/plans">Ver planos</Link>
+              <Link href="/plans">Mudar plano</Link>
             </Button>
           </CardContent>
         </Card>

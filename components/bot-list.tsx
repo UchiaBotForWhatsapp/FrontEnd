@@ -129,60 +129,35 @@ export function BotList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2">
           {bots.map((bot: BotItem) => {
             return (
               <Card
                 key={bot._id}
                 className="bg-card border-border hover:border-accent/50 transition"
               >
-              <CardHeader className="pb-4">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-start gap-4 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <BotIcon className="size-7 shrink-0 text-accent" aria-hidden="true" />
-                        <CardTitle className="text-xl">{bot.name}</CardTitle>
-                      </div>
-                      <CardDescription
-                        className="line-clamp-2"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {bot.description || "Sem descrição"}
-                      </CardDescription>
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <BotIcon
+                        className="size-7 shrink-0 text-accent"
+                        aria-hidden="true"
+                      />
+                      <CardTitle className="min-w-0 break-words text-xl">
+                        {bot.name}
+                      </CardTitle>
                     </div>
-                  </div>
-
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between ">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>
-                      <span className="font-medium text-foreground">
-                        {bot.messages_count || 0}
-                      </span>{" "}
-                      mensagens
-                    </span>
-                    <span>
-                      <span className="font-medium text-foreground">
-                        {Array.isArray(bot.products) ? bot.products.length : 0}
-                      </span>{" "}
-                      produtos
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant={bot.active ? "outline" : "default"}
+                      variant="outline"
                       onClick={() => handleToggleBot(bot)}
                       disabled={togglingBotId === bot._id}
-                      className="gap-2"
+                      aria-label={`${bot.active ? "Desativar" : "Ativar"} bot ${bot.name}`}
+                      className={
+                        bot.active
+                          ? "h-8 shrink-0 gap-2 rounded-full border-emerald-500/30 bg-emerald-500/10 px-3 text-emerald-500 hover:bg-emerald-500/15 hover:text-emerald-400"
+                          : "h-8 shrink-0 gap-2 rounded-full px-3 text-muted-foreground hover:text-foreground"
+                      }
                     >
                       {togglingBotId === bot._id ? (
                         <Spinner className="size-4" />
@@ -191,27 +166,65 @@ export function BotList() {
                       )}
                       {bot.active ? "Desativar" : "Ativar"}
                     </Button>
-                    <Link href={`/bots/${bot._id}`}>
+                  </div>
+                  <div className="min-w-0">
+                    <CardDescription
+                      className="line-clamp-2"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {bot.description || "Sem descrição"}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    <div className="grid gap-2 text-sm text-muted-foreground sm:flex sm:flex-wrap sm:items-center sm:gap-x-4">
+                      <span className="whitespace-nowrap">
+                        <span className="font-medium text-foreground">
+                          {bot.messages_count || 0}
+                        </span>{" "}
+                        mensagens
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                        Estado:
+                        <span
+                          className={
+                            bot.active
+                              ? "font-medium text-emerald-500"
+                              : "font-medium text-muted-foreground"
+                          }
+                        >
+                          {bot.active ? "Ativo" : "Inativo"}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Link href={`/bots/${bot._id}`}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-2 cursor-pointer"
+                        >
+                          <Edit2 className="w-4 h-4 " />
+                        </Button>
+                      </Link>
+
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="gap-2 cursor-pointer"
+                        onClick={() => OpenDeleteBot(bot)}
+                        className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                       >
-                        <Edit2 className="w-4 h-4 " />
+                        <Trash2 className="w-4 h-4 cursor-pointer" />
                       </Button>
-                    </Link>
-
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => OpenDeleteBot(bot)}
-                      className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4 cursor-pointer" />
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
+                </CardContent>
               </Card>
             );
           })}
