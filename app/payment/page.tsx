@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { authApi } from "@/lib/api-client"
 
 const PLANS = {
@@ -14,8 +14,11 @@ const PLANS = {
 function PaymentContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const planName = searchParams.get("plan") || "shunin"
-  const plan = PLANS[planName as keyof typeof PLANS] || PLANS.shunin
+  const requestedPlan = searchParams.get("plan")
+  const planName = requestedPlan === "jounin" || requestedPlan === "jonin"
+    ? "jounin"
+    : "shunin"
+  const plan = PLANS[planName]
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -25,19 +28,13 @@ function PaymentContent() {
     setError("")
 
     try {
-      // Here we would send the proof to the backend
-      // For now, we'll simulate the API call
-      await authApi.updatePlan(`pending(${planName})`) // 
-      // Redirect to confirmation page
+      await authApi.updatePlan(`pending(${planName})`)
       router.push("/payment-confirmation")
-    } catch (err: any) {
-      setError(err.message || "Erro ao enviar comprovativo")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao confirmar pagamento")
       setLoading(false)
     }
   }
-
-  const whatsappNumber = "244929004469"
-  const whatsappMessage = `Olá, envio o comprovativo do pagamento do plano ${plan.name}. Valor: ${plan.price} KZ.`
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-card py-12 px-4">
@@ -51,52 +48,21 @@ function PaymentContent() {
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">Detalhes do Pagamento</CardTitle>
-            <CardDescription>
-              Valor a pagar: <span className="font-semibold">{plan.price.toLocaleString()} KZ</span>
-            </CardDescription>
+            <CardTitle className="text-2xl">Métodos de Pagamento Disponíveis</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Métodos de Pagamento Disponíveis</h3>
-                <div className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">Transferência IBAN Angolano</h4>
-                    <p className="text-sm mb-2">Solicite os dados bancários via WhatsApp para realizar a transferência.</p>
-                    <a
-                      href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá, gostaria de solicitar os dados bancários para transferência IBAN do plano " + plan.name)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block"
-                    >
-                      <Button variant="outline" size="sm">
-                        Solicitar Dados via WhatsApp
-                      </Button>
-                    </a>
-                  </div>
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">Multicaixa Express</h4>
-                    <p className="text-sm">Número: 929004469</p>
-                    <p className="text-sm">Titular: UBot Ltd</p>
-                  </div>
+              <div className="rounded-lg bg-muted p-4">
+                <h3 className="mb-4 text-lg font-semibold">Pagamento por referência</h3>
+                <div className="space-y-2 text-sm">
+                  <p>Entidade: <span className="font-semibold">90201</span></p>
+                  <p>Referência: <span className="font-semibold">221610687</span></p>
+                  <p>Montante: <span className="font-semibold">{plan.price.toLocaleString()} KZ</span></p>
                 </div>
               </div>
 
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Após o pagamento, envie o comprovativo (foto ou documento) para o WhatsApp:
-                </p>
-                <a
-                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block"
-                >
-                  <Button variant="outline" className="mb-4">
-                    Enviar via WhatsApp
-                  </Button>
-                </a>
+              <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 text-sm">
+                Após o pagamento, receberá o número de mensagens pagas no sistema em alguns minutos.
               </div>
 
               {error && (

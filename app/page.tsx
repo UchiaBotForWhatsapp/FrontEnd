@@ -1,15 +1,10 @@
-"use client"
-
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, MessageCircle, Zap, BarChart3 } from "lucide-react"
-import { useState } from "react"
 
 export default function Landing() {
-  const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
-
   const PLANS = [
     {
       id: "genin",
@@ -30,38 +25,20 @@ export default function Landing() {
       name: "Jonin",
       subtitle: "Plano Profissional",
       description: "Usuários de alto uso e negócios em crescimento",
-      features: ["50 bots", "500.000 mensagens/mês", "Suporte 24/7", "API completa", "Webhooks avançados"],
+      features: ["50 bots", "500.000 mensagens/mês", "Suporte 24/7"],
       popular: true,
     },
-    {
-      id: "hokage",
-      name: "Hokage",
-      subtitle: "Plano Enterprise",
-      description: "Power users e empresas em escala",
-      features: [
-        "Bots ilimitados",
-        "Mensagens ilimitadas",
-        "Suporte dedicado 24/7",
-        "API completa",
-        "Integrações customizadas",
-      ],
-    },
   ]
-
-  const handleWhatsAppTest = () => {
-    window.open("https://wa.me/5511999999999", "_blank")
-  }
-
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between px-4">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-accent-foreground font-bold text-sm">UB</span>
+              <span className="text-accent-foreground font-bold text-sm">S</span>
             </div>
-            <span className="font-bold text-lg">UBot</span>
+            <span className="font-bold text-lg">Sefia</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm hover:text-accent transition">
@@ -86,7 +63,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="container px-4 py-20 md:py-32">
+      <section className="container mx-auto max-w-7xl px-4 py-20 md:py-32">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
             Gerencie seus <span className="text-accent">Bots WhatsApp</span> com Facilidade
@@ -101,16 +78,22 @@ export default function Landing() {
                 Criar Conta Grátis
               </Button>
             </Link>
-            <Button size="lg" variant="outline" onClick={handleWhatsAppTest}>
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Testar Bot no WhatsApp
-            </Button>
+            <a
+              href="https://wa.me/244955758961"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="lg" variant="outline">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Testar Bot no WhatsApp
+              </Button>
+            </a>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container px-4 py-20 border-t border-border">
+      <section id="features" className="container mx-auto max-w-7xl px-4 py-20 border-t border-border">
         <h2 className="text-3xl font-bold mb-12 text-center">Recursos Principais</h2>
         <div className="grid md:grid-cols-4 gap-6">
           {[
@@ -122,10 +105,10 @@ export default function Landing() {
             { icon: Zap, title: "Múltiplos Bots", description: "Gerencie vários bots em uma única plataforma" },
             { icon: BarChart3, title: "Análises", description: "Acompanhe o desempenho e estatísticas de seus bots" },
             { icon: Check, title: "Suporte 24/7", description: "Equipe pronta para ajudar no seu sucesso" },
-          ].map((feature, i) => {
+          ].map((feature) => {
             const Icon = feature.icon
             return (
-              <div key={i} className="p-6 rounded-lg border border-border bg-card hover:border-accent/50 transition">
+              <div key={feature.title} className="p-6 rounded-lg border border-border bg-card hover:border-accent/50 transition">
                 <Icon className="w-8 h-8 text-accent mb-3" />
                 <h3 className="font-bold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm">{feature.description}</p>
@@ -136,7 +119,7 @@ export default function Landing() {
       </section>
 
       {/* Example Section - WhatsApp Chat Layout */}
-      <section id="exemplo" className="container px-4 py-20 border-t border-border">
+      <section id="exemplo" className="container mx-auto max-w-7xl px-4 py-20 border-t border-border">
         <h2 className="text-3xl font-bold mb-12 text-center">Como Funciona</h2>
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
@@ -144,7 +127,7 @@ export default function Landing() {
               <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold">
                   1
-                </span>
+                </span>{" "}
                 Criar seu Bot
               </h3>
               <p className="text-muted-foreground">Defina o nome, tipo e comportamento do seu bot em minutos</p>
@@ -153,7 +136,7 @@ export default function Landing() {
               <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold">
                   2
-                </span>
+                </span>{" "}
                 Configurar Respostas
               </h3>
               <p className="text-muted-foreground">Crie fluxos de conversação personalizados com IA</p>
@@ -162,7 +145,7 @@ export default function Landing() {
               <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold">
                   3
-                </span>
+                </span>{" "}
                 Conectar ao WhatsApp
               </h3>
               <p className="text-muted-foreground">Integre seu bot e comece a atender clientes automaticamente</p>
@@ -173,10 +156,10 @@ export default function Landing() {
             {/* WhatsApp-like header */}
             <div className="bg-muted p-4 border-b border-border flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-sm">
-                UB
+                S
               </div>
               <div>
-                <h4 className="font-semibold text-sm">U Bot Support</h4>
+                <h4 className="font-semibold text-sm">Sefia Support</h4>
                 <p className="text-xs text-muted-foreground">online</p>
               </div>
             </div>
@@ -231,7 +214,7 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="container px-4 py-20 border-t border-border">
+      <section id="pricing" className="container mx-auto max-w-7xl px-4 py-20 border-t border-border">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-3">Escolha Seu Plano</h2>
           <p className="text-muted-foreground">Comece grátis e escale conforme necessário</p>
@@ -246,8 +229,6 @@ export default function Landing() {
                   ? "border-2 border-accent scale-105 md:scale-110"
                   : "border border-border hover:border-accent/50"
               }`}
-              onMouseEnter={() => setHoveredPlan(plan.id)}
-              onMouseLeave={() => setHoveredPlan(null)}
             >
               {plan.popular && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground">
@@ -261,8 +242,8 @@ export default function Landing() {
               </div>
               <div className="p-6 flex-1 flex flex-col">
                 <ul className="space-y-3 mb-6 flex-1">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex gap-3 text-sm">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-3 text-sm">
                       <Check className="w-5 h-5 text-accent flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
@@ -287,11 +268,11 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="container px-4 py-20 border-t border-border">
+      <section className="container mx-auto max-w-7xl px-4 py-20 border-t border-border">
         <div className="bg-card border border-accent/30 rounded-lg p-8 md:p-12 text-center">
           <h2 className="text-3xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Junte-se a milhares de empresas que já estão automatizando seu atendimento com U Bot
+            Junte-se a milhares de empresas que já estão automatizando seu atendimento com Sefia
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
@@ -299,24 +280,30 @@ export default function Landing() {
                 Criar Conta Grátis
               </Button>
             </Link>
-            <Button size="lg" variant="outline" onClick={handleWhatsAppTest}>
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Testar Agora
-            </Button>
+            <a
+              href="https://wa.me/5511999999999"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="lg" variant="outline">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Testar Agora
+              </Button>
+            </a>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 py-12">
-        <div className="container px-4">
+        <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center">
-                  <span className="text-accent-foreground font-bold text-xs">UB</span>
-                </div>
-                <span className="font-bold">U Bot</span>
+                <span className="text-accent-foreground font-bold text-xs">S</span>
+              </div>
+              <span className="font-bold">Sefia</span>
               </div>
               <p className="text-sm text-muted-foreground">Plataforma inteligente de automação WhatsApp</p>
             </div>
@@ -377,10 +364,12 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2026 U Bot. Todos os direitos reservados.</p>
+            <p>© 2026 Sefia. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
     </main>
   )
 }
+
+

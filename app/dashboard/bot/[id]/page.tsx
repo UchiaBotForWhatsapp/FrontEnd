@@ -4,7 +4,7 @@ import { Sidebar } from "@/components/sidebar"
 import { BotForm } from "@/components/bot-form"
 import { Spinner } from "@/components/ui/spinner"
 import { use, useEffect, useState } from "react"
-import { botApi } from "@/lib/api-client"
+import { botApi, type BotData } from "@/lib/api-client"
 
 interface BotPageProps {
   params: Promise<{ id: string }>
@@ -12,7 +12,7 @@ interface BotPageProps {
 
 export default function EditBotPage({ params }: BotPageProps) {
   const { id } = use(params)
-  const [botData, setBotData] = useState<any>(null)
+  const [botData, setBotData] = useState<BotData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -20,9 +20,9 @@ export default function EditBotPage({ params }: BotPageProps) {
     const fetchBot = async () => {
       try {
         const data = await botApi.get(id)
-        setBotData(data)
-      } catch (err: any) {
-        setError(err.message)
+        setBotData(data.bot)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro desconhecido")
       } finally {
         setLoading(false)
       }
@@ -57,8 +57,8 @@ export default function EditBotPage({ params }: BotPageProps) {
     <div className="flex h-screen bg-background">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="p-8 max-w-3xl mx-auto">
-          <BotForm botId={id} initialData={botData} />
+        <div className="p-4 pt-16 md:p-8 max-w-3xl mx-auto">
+          <BotForm botId={id} initialData={botData ?? undefined} />
         </div>
       </main>
     </div>

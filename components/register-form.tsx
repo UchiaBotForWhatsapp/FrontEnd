@@ -1,239 +1,264 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import type React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, LogIn } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { useAuth } from "@/hooks/use-auth"
+} from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
+import { LoadingButton } from "./loading-button";
+import { TermsModal } from "./terms-modal";
+import { GoogleAuthButton } from "./google-auth-button";
+import { toast } from "sonner";
+
+type Gender = "male" | "female" | "other";
 
 export function RegisterForm() {
-  const router = useRouter()
-  const { register, loading, error } = useAuth()
-
-  const [countries, setCountries] = useState<string[]>([])
-  const [cities, setCities] = useState<string[]>([])
-  const [allCities, setAllCities] = useState<{ country: string; cities: string[] }[]>([])
-  const [formError, setFormError] = useState("")
-
+  const router = useRouter();
+  const { register, googleLogin, loading } = useAuth();
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    country: "",
-    city: "",
+    gender: "" as Gender | "",
     password: "",
-    confirmPassword: "",
-  })
+    termsAccepted: false,
+  });
 
-  /* =====================
-     Input handler
-  ===================== */
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
 
-  /* =====================
-     Fetch countries + cities
-  ===================== */
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const res = await fetch("https://countriesnow.space/api/v0.1/countries")
-        const data = await res.json()
-
-        const countriesList = data.data
-          .map((c: any) => c.country)
-          .sort((a: string, b: string) => a.localeCompare(b))
-
-        setCountries(countriesList)
-        setAllCities(data.data) // guardar cidades por país
-      } catch (err) {
-        console.error("Erro ao carregar países e cidades", err)
-      }
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim() || !formData.gender || !formData.password) {
+      toast.error("Por favor, preencha todos os campos");
+      return;
     }
 
-    fetchCountries()
-  }, [])
-
-  /* =====================
-     Filtrar cidades por país
-  ===================== */
-  useEffect(() => {
-    if (!formData.country) {
-      setCities([])
-      return
+    if (formData.password.length < 8) {
+      toast.error("A senha deve ter pelo menos 8 caracteres");
+      return;
     }
 
-    const selectedCountry = allCities.find((c) => c.country === formData.country)
-    setCities(selectedCountry?.cities || [])
-  }, [formData.country, allCities])
+    if (!formData.termsAccepted) {
+      toast.error("Aceita os termos");
+      return;
+    }
 
-  /* =====================
-     Submit
-  ===================== */
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setFormError("")
+    const email = formData.email.trim().toLowerCase();
 
-  const { name, email, phone, country, city, password, confirmPassword } = formData
+    try {
+      await register({
+        name: formData.name,
+        email,
+        gender: formData.gender,
+        password: formData.password,
+        termsAccepted: formData.termsAccepted,
+      });
+      toast.success("Conta criada! Verifique seu email para ativar a conta.");
+      router.push(`/activate/${encodeURIComponent(email)}`);
+    } catch (submitError) {
+      toast.error(
+        submitError instanceof Error
+          ? submitError.message
+          : "Não foi possível criar sua conta",
+      );
+    }
+  };
 
-  // Validação básica
-  if (!name || !email || !phone || !country || !city || !password || !confirmPassword) {
-    setFormError("Por favor, preencha todos os campos")
-    return
-  }
+  const handleGoogleRegistration = async (idToken: string) => {
+    if (!formData.termsAccepted) {
+      toast.error("Aceita os termos");
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    setFormError("As senhas não correspondem")
-    return
-  }
-
-  if (password.length < 8) {
-    setFormError("A senha deve ter pelo menos 8 caracteres")
-    return
-  }
-
-  try {
-    // 🔑 Passando todos os campos para a função register
-    await register(name, email, phone, country, city, password)
-
-    // Redireciona para ativação
-    router.push(`/activate/${email}`)
-  } catch (err: any) {
-    setFormError(err.message)
-  }
-}
+    const response = await googleLogin(idToken, "register", true);
+    toast.success("Conta criada com sucesso. Bem-vindo!");
+    router.push(response.isNewUser ? "/plans" : "/dashboard");
+  };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Criar Conta</CardTitle>
-        <CardDescription>
-          Comece a gerenciar seus bots WhatsApp
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Card className="w-full max-w-md md:gap-3 md:py-4">
+        <CardHeader className="md:px-5 md:gap-1">
+          <CardTitle>Criar Conta</CardTitle>
+          <CardDescription>
+            Comece a gerenciar seus bots WhatsApp
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {(formError || error) && (
-            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              {formError || error}
+        <CardContent className="md:px-5">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-2">
+            <div>
+              <label htmlFor="name" className="mb-2 block text-sm font-medium md:mb-1">
+                Nome
+              </label>
+              <Input
+                id="name"
+                name="name"
+                autoComplete="name"
+                placeholder="Seu nome"
+                value={formData.name}
+                onChange={handleInputChange}
+                disabled={loading}
+                required
+              />
             </div>
-          )}
 
-          <Input
-            name="name"
-            placeholder="Nome completo"
-            value={formData.name}
-            onChange={handleInputChange}
-            disabled={loading}
-          />
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium md:mb-1">
+                Email
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="seu@email.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={loading}
+                required
+              />
+            </div>
 
-          <Input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleInputChange}
-            disabled={loading}
-          />
+            <div>
+              <label htmlFor="gender" className="mb-2 block text-sm font-medium md:mb-1">
+                Gênero
+              </label>
+              <Select
+                value={formData.gender}
+                onValueChange={(gender) => {
+                  if (gender === "male" || gender === "female" || gender === "other") {
+                    setFormData((previous) => ({ ...previous, gender }));
+                  }
+                }}
+                disabled={loading}
+              >
+                <SelectTrigger id="gender" className="w-full" aria-label="Gênero">
+                  <SelectValue placeholder="Selecione seu gênero" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Masculino</SelectItem>
+                  <SelectItem value="female">Feminino</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <Input
-            name="phone"
-            placeholder="Telefone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            disabled={loading}
-          />
+            <div>
+              <label htmlFor="password" className="mb-2 block text-sm font-medium md:mb-1">
+                Senha
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Pelo menos 8 caracteres"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  minLength={8}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((previous) => !previous)}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-          {/* País */}
-          <Select
-            value={formData.country}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, country: value, city: "" }))
-            }
-            disabled={loading}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione o país" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map((country) => (
-                <SelectItem key={country} value={country}>
-                  {country}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="terms"
+                checked={formData.termsAccepted}
+                onCheckedChange={(checked) =>
+                  setFormData((previous) => ({
+                    ...previous,
+                    termsAccepted: checked === true,
+                  }))
+                }
+                disabled={loading}
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm leading-5 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Eu aceito os{" "}
+                <button
+                  type="button"
+                  onClick={() => setTermsModalOpen(true)}
+                  className="font-medium text-accent hover:underline"
+                >
+                  Termos e Condições
+                </button>
+              </label>
+            </div>
 
-          {/* Cidade */}
-          <Select
-            value={formData.city}
-            onValueChange={(value) => setFormData((prev) => ({ ...prev, city: value }))}
-            disabled={!formData.country || loading}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione a cidade" />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((city) => (
-                <SelectItem key={city} value={city}>
-                  {city}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <LoadingButton
+              loading={loading}
+              type="submit"
+              className="w-full cursor-pointer bg-accent hover:bg-accent/90"
+            >
+              <LogIn />
+              Criar Conta
+            </LoadingButton>
+            <div className="md:col-span-2">
+              <GoogleAuthButton
+                onCredential={handleGoogleRegistration}
+                requiresTermsAcceptance={!formData.termsAccepted}
+                mode="register"
+              />
+            </div>
 
-          <Input
-            name="password"
-            type="password"
-            placeholder="Senha"
-            value={formData.password}
-            onChange={handleInputChange}
-            disabled={loading}
-          />
+            <div className="text-center text-sm">
+              Já tem conta?{" "}
+              <Link href="/login" className="text-accent hover:underline">
+                Faça login
+              </Link>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
-          <Input
-            name="confirmPassword"
-            type="password"
-            placeholder="Confirmar senha"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            disabled={loading}
-          />
-
-          <Button
-            type="submit"
-            className="w-full bg-accent hover:bg-accent/90"
-            disabled={loading}
-          >
-            {loading ? "Criando conta..." : "Criar Conta"}
-          </Button>
-
-          <div className="text-center text-sm">
-            Já tem conta?{" "}
-            <Link href="/login" className="text-accent hover:underline">
-              Faça login
-            </Link>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  )
+      <TermsModal
+        open={termsModalOpen}
+        onOpenChange={setTermsModalOpen}
+        onAccept={() =>
+          setFormData((previous) => ({ ...previous, termsAccepted: true }))
+        }
+      />
+    </>
+  );
 }
